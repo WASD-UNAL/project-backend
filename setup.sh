@@ -23,6 +23,7 @@ else
 fi
 
 # --- Bloque 3: Inicialización de Datos (SQL) ---
+echo ">>> [2/4] Inicializando base de datos..."
 if [ -f scripts/init.sql ]; then
   echo "💉 Iniciando la Base de datos..."
   # Se usan las variables cargadas del .env automáticamente
