@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:15
-    container_name: project_db
+    container_name: ${DB_NAME}
     restart: always
     ports:
       - "${DB_PORT}:5432"
