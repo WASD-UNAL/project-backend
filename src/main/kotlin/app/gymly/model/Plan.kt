@@ -1,4 +1,4 @@
-package app.gymly.model.presentation
+package app.gymly.model
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

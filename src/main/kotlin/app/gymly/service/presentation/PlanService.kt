@@ -1,7 +1,7 @@
 package app.gymly.service.presentation
 
-import app.gymly.model.presentation.Plan
-import app.gymly.repository.presentation.PlanRepository
+import app.gymly.model.Plan
+import app.gymly.repository.PlanRepository
 import org.springframework.stereotype.Service
 
 @Service

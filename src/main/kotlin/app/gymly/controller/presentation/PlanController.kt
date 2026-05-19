@@ -1,5 +1,5 @@
 package app.gymly.controller.presentation
-import app.gymly.model.presentation.Plan
+import app.gymly.model.Plan
 import app.gymly.service.presentation.PlanService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
