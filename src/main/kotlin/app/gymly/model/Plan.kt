@@ -7,7 +7,7 @@ import jakarta.persistence.*
 class Plan(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int? = null,
+    val id: Int = 0,
 
     @Column(nullable = false)
     var name: String,
