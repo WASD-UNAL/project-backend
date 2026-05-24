@@ -1,6 +1,6 @@
 package app.gymly.dto
 
-data class ColorAlertDTO(
+data class ColorAlert(
     val document: Int,
     val userName: String?,
     val statusColor: String, // "GREEN", "YELLOW", "RED"

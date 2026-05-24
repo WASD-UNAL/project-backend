@@ -7,7 +7,7 @@ import java.time.OffsetDateTime
 @Table(name = "users")
 class User(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int = 0,
+    var id: Int = 0,
 
     @Column(name = "role_id", nullable = false)
     var roleId: Int,
