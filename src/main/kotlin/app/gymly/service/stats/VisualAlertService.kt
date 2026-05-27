@@ -1,6 +1,6 @@
 package app.gymly.service.stats
 
-import app.gymly.dto.ColorAlertDTO
+import app.gymly.dto.VisualAlertDTO
 import app.gymly.model.User
 import app.gymly.model.Membership
 import app.gymly.repository.MembershipRepository
@@ -10,17 +10,17 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 @Service
-class ColorAlertService(
+class VisualAlertService(
     private val userRepository: UserRepository,
     private val membershipRepository: MembershipRepository
 ) {
 
-    fun checkAccessColor(document: Int): ColorAlertDTO {
+    fun checkAccessColor(document: Int): VisualAlertDTO {
         val user = userRepository.findByDocument(document)
-            ?: return ColorAlertDTO(document, null, "RED", 0, "Usuario no registrado en el sistema.")
+            ?: return VisualAlertDTO(document, null, "RED", 0, "Usuario no registrado en el sistema.")
 
         val latestMembership = getLatestMembership(user.id)
-            ?: return ColorAlertDTO(document, user.fullName(), "RED", 0, "El usuario no cuenta con ninguna membresía.")
+            ?: return VisualAlertDTO(document, user.fullName(), "RED", 0, "El usuario no cuenta con ninguna membresía.")
 
         return evaluateMembershipStatus(document, user, latestMembership)
     }
@@ -31,31 +31,31 @@ class ColorAlertService(
             .maxByOrNull { it.endDate }
     }
 
-    private fun evaluateMembershipStatus(document: Int, user: User, membership: Membership): ColorAlertDTO {
+    private fun evaluateMembershipStatus(document: Int, user: User, membership: Membership): VisualAlertDTO {
         val fullName = user.fullName()
 
         if (membership.status != "active") {
-            return ColorAlertDTO(document, fullName, "RED", 0, "Membresía inactiva (Estado: ${membership.status}).")
+            return VisualAlertDTO(document, fullName, "RED", 0, "Membresía inactiva (Estado: ${membership.status}).")
         }
 
         val today = LocalDate.now()
         val endDate = membership.endDate
 
         if (endDate.isBefore(today)) {
-            return ColorAlertDTO(document, fullName, "RED", 0, "Membresía vencida el $endDate.")
+            return VisualAlertDTO(document, fullName, "RED", 0, "Membresía vencida el $endDate.")
         }
 
         val daysRemaining = ChronoUnit.DAYS.between(today, endDate)
         return buildAlertByDays(document, fullName, daysRemaining)
     }
 
-    private fun buildAlertByDays(document: Int, fullName: String, daysRemaining: Long): ColorAlertDTO {
+    private fun buildAlertByDays(document: Int, fullName: String, daysRemaining: Long): VisualAlertDTO {
         return when {
             daysRemaining > 7 -> {
-                ColorAlertDTO(document, fullName, "GREEN", daysRemaining, "Acceso permitido. Vigente por $daysRemaining días.")
+                VisualAlertDTO(document, fullName, "GREEN", daysRemaining, "Acceso permitido. Vigente por $daysRemaining días.")
             }
             else -> {
-                ColorAlertDTO(document, fullName, "YELLOW", daysRemaining, "¡Atención! Quedan $daysRemaining días o menos. Recordar cobrar renovación.")
+                VisualAlertDTO(document, fullName, "YELLOW", daysRemaining, "¡Atención! Quedan $daysRemaining días o menos. Recordar cobrar renovación.")
             }
         }
     }
