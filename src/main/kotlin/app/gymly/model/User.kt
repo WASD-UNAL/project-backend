@@ -1,19 +1,27 @@
 package app.gymly.model
 
 import jakarta.persistence.*
-
+import java.time.OffsetDateTime
 
 @Entity
 @Table(name = "users")
 class User(
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id")
-    var role: Role,
+    @Column(name = "role_id", nullable = false)
+    var roleId: Int,
+    @Column(nullable = false)
     var name: String,
-    @Column(name = "last_name")
+    @Column(name = "last_name", nullable = false)
     var lastname: String,
+    @Column(unique = true)
     var email: String,
-    var password: String,
+    @Column(name = "password_hash",nullable = false)
+    var passwordHash: String,
+    @Column(unique = true ,nullable = false)
+    var document: Int,
+    @Column(name = "created_at", insertable = false, updatable = false)
+    var createdAt: OffsetDateTime? = null,
+    @Column(nullable = false)
+    var active: Boolean = true
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

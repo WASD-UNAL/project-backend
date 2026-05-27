@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
     role_id integer NOT NULL,
     name varchar NOT NULL,
     last_name varchar NOT NULL,
+    document integer NOT NULL UNIQUE,
     phone varchar UNIQUE,
     email varchar UNIQUE,
     password_hash text NOT NULL,

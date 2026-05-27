@@ -8,14 +8,11 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/", )
 class RoleController(private val roleRepository: RoleRepository) {
 
-    @GetMapping
-    fun status() = mapOf("message" to "Backend levantado con éxito")
-
-    @PostMapping("/api/rol")
+    @PostMapping("/rol")
     fun createRole(@RequestBody newRole: Role): Role {
         return roleRepository.save(newRole)
     }
 
-    @GetMapping("/api/roles")
+    @GetMapping("/roles")
     fun listRoles(): List<Role> = roleRepository.findAll()
 }
