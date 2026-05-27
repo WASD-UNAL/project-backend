@@ -5,7 +5,7 @@ import app.gymly.repository.PlanRepository
 import org.springframework.stereotype.Service
 
 @Service
-class PlanCRUDService(private val planRepository: PlanRepository) {
+class PlanManagementService(private val planRepository: PlanRepository) {
 
     fun createPlan(plan: Plan): Plan {
         return planRepository.save(plan)
