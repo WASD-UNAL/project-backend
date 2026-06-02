@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface UserRepository : JpaRepository<User, Int> {
-    fun findByDocument(document: Int): User?
+    fun findByDocument(document: String): User?
 }
