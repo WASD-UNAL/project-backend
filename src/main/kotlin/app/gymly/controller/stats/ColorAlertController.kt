@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*
 class ColorAlertController(private val colorAlertService: ColorAlertService) {
 
     @GetMapping("/{document}")
-    fun getAccessAlert(@PathVariable document: Int): ResponseEntity<ColorAlertDTO> {
+    fun getAccessAlert(@PathVariable document: String): ResponseEntity<ColorAlertDTO> {
         val alert = colorAlertService.checkAccessColor(document)
         return ResponseEntity.ok(alert)
     }

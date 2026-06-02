@@ -1,9 +1,10 @@
 package app.gymly.model
 
 import jakarta.persistence.*
+import java.math.BigDecimal
 
 @Entity
-@Table(name = "plan")
+@Table(name = "plans")
 class Plan(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +20,7 @@ class Plan(
     var durationDays: Int,
 
     @Column(nullable = false)
-    var price: Int,
+    var price: BigDecimal,
 
     @Column(nullable = false)
     var active: Boolean = true

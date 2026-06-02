@@ -1,6 +1,7 @@
 package app.gymly.service.stats
 
 import app.gymly.dto.ColorAlertDTO
+import app.gymly.model.MembershipStatus
 import app.gymly.model.User
 import app.gymly.model.Membership
 import app.gymly.repository.MembershipRepository
@@ -15,11 +16,11 @@ class ColorAlertService(
     private val membershipRepository: MembershipRepository
 ) {
 
-    fun checkAccessColor(document: Int): ColorAlertDTO {
+    fun checkAccessColor(document: String): ColorAlertDTO {
         val user = userRepository.findByDocument(document)
             ?: return ColorAlertDTO(document, null, "RED", 0, "Usuario no registrado en el sistema.")
 
-        val latestMembership = getLatestMembership(user.id)
+        val latestMembership = getLatestMembership(user.id!!)
             ?: return ColorAlertDTO(document, user.fullName(), "RED", 0, "El usuario no cuenta con ninguna membresía.")
 
         return evaluateMembershipStatus(document, user, latestMembership)
@@ -31,10 +32,10 @@ class ColorAlertService(
             .maxByOrNull { it.endDate }
     }
 
-    private fun evaluateMembershipStatus(document: Int, user: User, membership: Membership): ColorAlertDTO {
+    private fun evaluateMembershipStatus(document: String, user: User, membership: Membership): ColorAlertDTO {
         val fullName = user.fullName()
 
-        if (membership.status != "active") {
+        if (membership.status != MembershipStatus.active) {
             return ColorAlertDTO(document, fullName, "RED", 0, "Membresía inactiva (Estado: ${membership.status}).")
         }
 
@@ -49,7 +50,7 @@ class ColorAlertService(
         return buildAlertByDays(document, fullName, daysRemaining)
     }
 
-    private fun buildAlertByDays(document: Int, fullName: String, daysRemaining: Long): ColorAlertDTO {
+    private fun buildAlertByDays(document: String, fullName: String, daysRemaining: Long): ColorAlertDTO {
         return when {
             daysRemaining > 7 -> {
                 ColorAlertDTO(document, fullName, "GREEN", daysRemaining, "Acceso permitido. Vigente por $daysRemaining días.")

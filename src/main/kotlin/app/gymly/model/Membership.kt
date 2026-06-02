@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 
 @Entity
-@Table(name = "membership")
+@Table(name = "memberships")
 class Membership(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0,
@@ -22,9 +22,17 @@ class Membership(
     @Column(name = "end_date", nullable = false)
     val endDate: LocalDate,
 
-    @Column(nullable = false)
-    val status: String = "active",
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "membership_status", nullable = false)
+    val status: MembershipStatus = MembershipStatus.active,
 
     @Column(name = "created_at", insertable = false, updatable = false)
     val createdAt: OffsetDateTime? = null
 )
+
+enum class MembershipStatus {
+    active,
+    expired,
+    frozen
+}
+

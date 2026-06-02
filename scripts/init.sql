@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
     role_id integer NOT NULL,
     name varchar NOT NULL,
     last_name varchar NOT NULL,
-    document integer NOT NULL UNIQUE,
+    document varchar NOT NULL UNIQUE,
     phone varchar UNIQUE,
     email varchar UNIQUE,
     password_hash text NOT NULL,
@@ -78,27 +78,27 @@ DO $$ BEGIN
 ALTER TABLE users ADD CONSTRAINT fk_user_role FOREIGN KEY (role_id) REFERENCES roles (id);
 END IF;
 
-    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'fk_membership_user' AND table_name = 'membership' AND table_schema = 'public') THEN
-ALTER TABLE membership ADD CONSTRAINT fk_membership_user FOREIGN KEY (user_id) REFERENCES users (id);
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'fk_membership_user' AND table_name = 'memberships' AND table_schema = 'public') THEN
+ALTER TABLE memberships ADD CONSTRAINT fk_membership_user FOREIGN KEY (user_id) REFERENCES users (id);
 END IF;
 
-    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'fk_membership_plan' AND table_name = 'membership' AND table_schema = 'public') THEN
-ALTER TABLE membership ADD CONSTRAINT fk_membership_plan FOREIGN KEY (plan_id) REFERENCES plan (id);
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'fk_membership_plan' AND table_name = 'memberships' AND table_schema = 'public') THEN
+ALTER TABLE memberships ADD CONSTRAINT fk_membership_plan FOREIGN KEY (plan_id) REFERENCES plans (id);
 END IF;
 
-    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'fk_attendance_user' AND table_name = 'attendance' AND table_schema = 'public') THEN
-ALTER TABLE attendance ADD CONSTRAINT fk_attendance_user FOREIGN KEY (user_id) REFERENCES users (id);
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'fk_attendance_user' AND table_name = 'attendances' AND table_schema = 'public') THEN
+ALTER TABLE attendances ADD CONSTRAINT fk_attendance_user FOREIGN KEY (user_id) REFERENCES users (id);
 END IF;
 
-    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'fk_payment_membership' AND table_name = 'payment' AND table_schema = 'public') THEN
-ALTER TABLE payment ADD CONSTRAINT fk_payment_membership FOREIGN KEY (membership_id) REFERENCES membership (id);
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'fk_payment_membership' AND table_name = 'payments' AND table_schema = 'public') THEN
+ALTER TABLE payments ADD CONSTRAINT fk_payment_membership FOREIGN KEY (membership_id) REFERENCES memberships (id);
 END IF;
 
-    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'fk_payment_user' AND table_name = 'payment' AND table_schema = 'public') THEN
-ALTER TABLE payment ADD CONSTRAINT fk_payment_user FOREIGN KEY (user_id) REFERENCES users (id);
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'fk_payment_user' AND table_name = 'payments' AND table_schema = 'public') THEN
+ALTER TABLE payments ADD CONSTRAINT fk_payment_user FOREIGN KEY (user_id) REFERENCES users (id);
 END IF;
 
-    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'fk_payment_discount' AND table_name = 'payment' AND table_schema = 'public') THEN
-ALTER TABLE payment ADD CONSTRAINT fk_payment_discount FOREIGN KEY (discount_id) REFERENCES discount (id);
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'fk_payment_discount' AND table_name = 'payments' AND table_schema = 'public') THEN
+ALTER TABLE payments ADD CONSTRAINT fk_payment_discount FOREIGN KEY (discount_id) REFERENCES discounts (id);
 END IF;
 END $$;
