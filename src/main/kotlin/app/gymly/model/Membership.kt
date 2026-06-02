@@ -23,7 +23,7 @@ class Membership(
     val endDate: LocalDate,
 
     @Column(nullable = false)
-    val status: String = "active",
+    val status: MembershipStatus = MembershipStatus.ACTIVE,
 
     @Column(name = "created_at", insertable = false, updatable = false)
     val createdAt: OffsetDateTime? = null
