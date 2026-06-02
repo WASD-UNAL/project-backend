@@ -15,7 +15,7 @@ class VisualAlertService(
     private val membershipRepository: MembershipRepository
 ) {
 
-    fun checkAccessColor(document: Int): VisualAlertDTO {
+    fun checkAccessColor(document: String): VisualAlertDTO {
         val user = userRepository.findByDocument(document)
             ?: return VisualAlertDTO(document, null, "RED", 0, "Usuario no registrado en el sistema.")
 
@@ -26,12 +26,10 @@ class VisualAlertService(
     }
 
     private fun getLatestMembership(userId: Int): Membership? {
-        return membershipRepository.findAll()
-            .filter { it.userId == userId }
-            .maxByOrNull { it.endDate }
+        return membershipRepository.findFirstByUserIdOrderByEndDateDesc(userId)
     }
 
-    private fun evaluateMembershipStatus(document: Int, user: User, membership: Membership): VisualAlertDTO {
+    private fun evaluateMembershipStatus(document: String, user: User, membership: Membership): VisualAlertDTO {
         val fullName = user.fullName()
 
         if (membership.status != "active") {
@@ -49,7 +47,7 @@ class VisualAlertService(
         return buildAlertByDays(document, fullName, daysRemaining)
     }
 
-    private fun buildAlertByDays(document: Int, fullName: String, daysRemaining: Long): VisualAlertDTO {
+    private fun buildAlertByDays(document: String, fullName: String, daysRemaining: Long): VisualAlertDTO {
         return when {
             daysRemaining > 7 -> {
                 VisualAlertDTO(document, fullName, "GREEN", daysRemaining, "Acceso permitido. Vigente por $daysRemaining días.")

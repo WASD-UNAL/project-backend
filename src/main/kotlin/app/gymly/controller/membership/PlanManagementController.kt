@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/membership/plans")
+@RequestMapping("/membership/plans")
 class PlanManagementController(private val planManagementService: PlanManagementService) {
 
     @PostMapping
