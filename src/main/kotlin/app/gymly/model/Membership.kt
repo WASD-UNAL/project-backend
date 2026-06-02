@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 
 @Entity
-@Table(name = "membership")
+@Table(name = "memberships")
 class Membership(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0,

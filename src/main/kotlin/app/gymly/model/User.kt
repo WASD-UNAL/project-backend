@@ -15,6 +15,8 @@ class User(
     @Column(name = "last_name", nullable = false)
     var lastname: String,
     @Column(unique = true)
+    var phone: String,
+    @Column(unique = true)
     var email: String,
     @Column(name = "password_hash",nullable = false)
     var passwordHash: String,
