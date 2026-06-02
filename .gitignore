@@ -42,3 +42,6 @@ out/
 ### Enviroment variables ###
 .env
 
+### Agent ###
+Agent.md
+
