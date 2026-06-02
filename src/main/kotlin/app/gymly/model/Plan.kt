@@ -1,6 +1,7 @@
 package app.gymly.model
 
 import jakarta.persistence.*
+import java.math.BigDecimal
 
 @Entity
 @Table(name = "plan")
@@ -18,8 +19,8 @@ class Plan(
     @Column(name = "duration_days", nullable = false)
     var durationDays: Int,
 
-    @Column(nullable = false)
-    var price: Int,
+    @Column(nullable = false, precision = 10, scale = 2)
+    var price: BigDecimal,
 
     @Column(nullable = false)
     var active: Boolean = true
