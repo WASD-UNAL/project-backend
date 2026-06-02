@@ -26,9 +26,7 @@ class VisualAlertService(
     }
 
     private fun getLatestMembership(userId: Int): Membership? {
-        return membershipRepository.findAll()
-            .filter { it.userId == userId }
-            .maxByOrNull { it.endDate }
+        return membershipRepository.findFirstByUserIdOrderByEndDateDesc(userId)
     }
 
     private fun evaluateMembershipStatus(document: String, user: User, membership: Membership): VisualAlertDTO {
