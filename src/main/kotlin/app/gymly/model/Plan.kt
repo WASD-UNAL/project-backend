@@ -19,7 +19,7 @@ class Plan(
     @Column(name = "duration_days", nullable = false)
     var durationDays: Int,
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 10, scale = 2)
     var price: BigDecimal,
 
     @Column(nullable = false)

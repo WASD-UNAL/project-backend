@@ -22,17 +22,9 @@ class Membership(
     @Column(name = "end_date", nullable = false)
     val endDate: LocalDate,
 
-    @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "membership_status", nullable = false)
-    val status: MembershipStatus = MembershipStatus.active,
+    @Column(nullable = false)
+    val status: MembershipStatus = MembershipStatus.ACTIVE,
 
     @Column(name = "created_at", insertable = false, updatable = false)
     val createdAt: OffsetDateTime? = null
 )
-
-enum class MembershipStatus {
-    active,
-    expired,
-    frozen
-}
-

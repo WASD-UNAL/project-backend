@@ -5,7 +5,7 @@ import app.gymly.repository.PlanRepository
 import org.springframework.stereotype.Service
 
 @Service
-class PlanService(private val planRepository: PlanRepository) {
+class PlanViewService(private val planRepository: PlanRepository) {
 
     fun getActivePlans(): List<Plan> {
         return planRepository.findByActiveTrue()

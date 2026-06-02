@@ -1,24 +1,24 @@
 package app.gymly.controller.membership
 
 import app.gymly.model.Plan
-import app.gymly.service.membership.PlanCRUDService
+import app.gymly.service.membership.PlanManagementService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/membership/plans")
-class MembershipPlanController(private val planCRUDService: PlanCRUDService) {
+@RequestMapping("/membership/plans")
+class PlanManagementController(private val planManagementService: PlanManagementService) {
 
     @PostMapping
     fun createPlan(@RequestBody plan: Plan): ResponseEntity<Plan> {
-        val createdPlan = planCRUDService.createPlan(plan)
+        val createdPlan = planManagementService.createPlan(plan)
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPlan)
     }
 
     @PutMapping("/{id}")
     fun updatePlan(@PathVariable id: Int, @RequestBody plan: Plan): ResponseEntity<Plan> {
-        val updated = planCRUDService.updatePlan(id, plan)
+        val updated = planManagementService.updatePlan(id, plan)
         return if (updated != null) {
             ResponseEntity.ok(updated)
         } else {
@@ -28,7 +28,7 @@ class MembershipPlanController(private val planCRUDService: PlanCRUDService) {
 
     @DeleteMapping("/{id}")
     fun deletePlan(@PathVariable id: Int): ResponseEntity<Unit> {
-        val deleted = planCRUDService.deletePlan(id)
+        val deleted = planManagementService.deletePlan(id)
         return if (deleted) {
             ResponseEntity.noContent().build()
         } else {
