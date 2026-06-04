@@ -1,4 +1,4 @@
-package app.gymly.dto
+package app.gymly.dto.stats
 
 data class VisualAlertDTO(
     val document: String,

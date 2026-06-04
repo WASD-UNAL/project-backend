@@ -1,6 +1,6 @@
 package app.gymly.controller.stats
 
-import app.gymly.dto.VisualAlertDTO
+import app.gymly.dto.stats.VisualAlertDTO
 import app.gymly.service.stats.VisualAlertService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*

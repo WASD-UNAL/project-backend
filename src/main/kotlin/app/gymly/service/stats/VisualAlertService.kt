@@ -1,6 +1,6 @@
 package app.gymly.service.stats
 
-import app.gymly.dto.VisualAlertDTO
+import app.gymly.dto.stats.VisualAlertDTO
 import app.gymly.model.User
 import app.gymly.model.Membership
 import app.gymly.model.MembershipStatus
