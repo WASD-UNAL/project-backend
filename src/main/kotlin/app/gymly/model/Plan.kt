@@ -8,7 +8,7 @@ import java.math.BigDecimal
 class Plan(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int = 0,
+    val id: Int? = null,
 
     @Column(nullable = false)
     var name: String,
