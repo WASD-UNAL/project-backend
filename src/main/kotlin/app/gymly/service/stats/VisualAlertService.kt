@@ -20,7 +20,7 @@ class VisualAlertService(
         val user = userRepository.findByDocument(document)
             ?: return VisualAlertDTO(document, null, "RED", 0, "Usuario no registrado en el sistema.")
 
-        val latestMembership = getLatestMembership(user.id)
+        val latestMembership = getLatestMembership(user.id ?: 0)
             ?: return VisualAlertDTO(document, user.fullName(), "RED", 0, "El usuario no cuenta con ninguna membresía.")
 
         return evaluateMembershipStatus(document, user, latestMembership)
