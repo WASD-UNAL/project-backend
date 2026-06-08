@@ -14,7 +14,7 @@ import java.time.LocalDate
 class Discount(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int = 0,
+    var id: Int = 0,
 
     @Column(nullable = false, precision = 5, scale = 2)
     var percentage: BigDecimal,

@@ -8,23 +8,23 @@ import java.time.OffsetDateTime
 @Table(name = "memberships")
 class Membership(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int = 0,
+    var id: Int = 0,
 
     @Column(name = "user_id", nullable = false)
-    val userId: Int,
+    var userId: Int,
 
     @Column(name = "plan_id", nullable = false)
-    val planId: Int,
+    var planId: Int,
 
     @Column(name = "init_date", nullable = false)
-    val initDate: LocalDate,
+    var initDate: LocalDate,
 
     @Column(name = "end_date", nullable = false)
-    val endDate: LocalDate,
+    var endDate: LocalDate,
 
     @Column(nullable = false)
-    val status: MembershipStatus = MembershipStatus.ACTIVE,
+    var status: MembershipStatus = MembershipStatus.ACTIVE,
 
     @Column(name = "created_at", insertable = false, updatable = false)
-    val createdAt: OffsetDateTime? = null
+    var createdAt: OffsetDateTime? = null
 )
