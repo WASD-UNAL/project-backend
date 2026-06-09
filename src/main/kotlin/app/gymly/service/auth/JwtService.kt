@@ -15,25 +15,48 @@ import java.time.temporal.ChronoUnit
 class JwtService(
     private val jwtEncoder: JwtEncoder,
     @Value("\${app.jwt.expiration-minutes}") private val expirationMinutes: Long,
+    @Value("\${app.jwt.refresh-expiration-days}") private val refreshExpirationDays: Long,
     @Value("\${app.jwt.issuer}") private val issuer: String
 ) {
 
-    data class IssuedToken(val token: String, val expiresAt: Instant)
+    data class IssuedToken(
+        val token: String,
+        val expiresAt: Instant,
+        val refreshToken: String,
+        val refreshExpiresAt: Instant
+    )
 
     fun issue(user: User, roleName: String): IssuedToken {
         val now = Instant.now()
-        val expiresAt = now.plus(expirationMinutes, ChronoUnit.MINUTES)
-        val claims = JwtClaimsSet.builder()
+        val accessExpiresAt = now.plus(expirationMinutes, ChronoUnit.MINUTES)
+        val refreshExpiresAt = now.plus(refreshExpirationDays, ChronoUnit.DAYS)
+
+        val accessClaims = JwtClaimsSet.builder()
             .issuer(issuer)
             .issuedAt(now)
-            .expiresAt(expiresAt)
+            .expiresAt(accessExpiresAt)
             .subject(user.id?.toString() ?: error("User id is null after persistence"))
             .claim("role", roleName.uppercase())
             .claim("document", user.document)
             .claim("email", user.email)
             .build()
+
+        val refreshClaims = JwtClaimsSet.builder()
+            .issuer(issuer)
+            .issuedAt(now)
+            .expiresAt(refreshExpiresAt)
+            .subject(user.id?.toString() ?: error("User id is null after persistence"))
+            .build()
+
         val header = JwsHeader.with(MacAlgorithm.HS256).build()
-        val token = jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).tokenValue
-        return IssuedToken(token, expiresAt)
+        val accessToken = jwtEncoder.encode(JwtEncoderParameters.from(header, accessClaims)).tokenValue
+        val refreshToken = jwtEncoder.encode(JwtEncoderParameters.from(header, refreshClaims)).tokenValue
+
+        return IssuedToken(
+            token = accessToken,
+            expiresAt = accessExpiresAt,
+            refreshToken = refreshToken,
+            refreshExpiresAt = refreshExpiresAt
+        )
     }
 }

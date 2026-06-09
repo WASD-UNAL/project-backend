@@ -3,6 +3,7 @@ package app.gymly.service.stats
 import app.gymly.dto.VisualAlertDTO
 import app.gymly.model.User
 import app.gymly.model.Membership
+import app.gymly.model.MembershipStatus
 import app.gymly.repository.MembershipRepository
 import app.gymly.repository.UserRepository
 import org.springframework.stereotype.Service
@@ -19,7 +20,7 @@ class VisualAlertService(
         val user = userRepository.findByDocument(document)
             ?: return VisualAlertDTO(document, null, "RED", 0, "Usuario no registrado en el sistema.")
 
-        val latestMembership = getLatestMembership(user.id)
+        val latestMembership = getLatestMembership(user.id!!)
             ?: return VisualAlertDTO(document, user.fullName(), "RED", 0, "El usuario no cuenta con ninguna membresía.")
 
         return evaluateMembershipStatus(document, user, latestMembership)
@@ -32,7 +33,7 @@ class VisualAlertService(
     private fun evaluateMembershipStatus(document: String, user: User, membership: Membership): VisualAlertDTO {
         val fullName = user.fullName()
 
-        if (membership.status != "active") {
+        if (membership.status != MembershipStatus.ACTIVE) {
             return VisualAlertDTO(document, fullName, "RED", 0, "Membresía inactiva (Estado: ${membership.status}).")
         }
 
