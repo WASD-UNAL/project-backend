@@ -1,8 +1,8 @@
 package app.gymly.controller.membership
 
-import app.gymly.dto.membership.DiscountCreateDTO
-import app.gymly.dto.membership.DiscountResponseDTO
-import app.gymly.dto.membership.DiscountUpdateDTO
+import app.gymly.dto.membership.DiscountCreate
+import app.gymly.dto.membership.DiscountResponse
+import app.gymly.dto.membership.DiscountUpdate
 import app.gymly.service.membership.DiscountManagementService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.*
 class DiscountManagementController(private val discountManagementService: DiscountManagementService) {
 
     @PostMapping
-    fun createDiscount(@Valid @RequestBody dto: DiscountCreateDTO): ResponseEntity<DiscountResponseDTO> {
+    fun createDiscount(@Valid @RequestBody dto: DiscountCreate): ResponseEntity<DiscountResponse> {
         val createdDiscount = discountManagementService.createDiscount(dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(createdDiscount)
     }
 
     @GetMapping
-    fun getAllDiscounts(): ResponseEntity<List<DiscountResponseDTO>> {
+    fun getAllDiscounts(): ResponseEntity<List<DiscountResponse>> {
         val discounts = discountManagementService.getAllDiscounts()
         return ResponseEntity.ok(discounts)
     }
@@ -28,8 +28,8 @@ class DiscountManagementController(private val discountManagementService: Discou
     @PutMapping("/{id}")
     fun updateDiscount(
         @PathVariable id: Int,
-        @Valid @RequestBody dto: DiscountUpdateDTO
-    ): ResponseEntity<DiscountResponseDTO> {
+        @Valid @RequestBody dto: DiscountUpdate
+    ): ResponseEntity<DiscountResponse> {
         val updated = discountManagementService.updateDiscount(id, dto)
         return if (updated != null) {
             ResponseEntity.ok(updated)

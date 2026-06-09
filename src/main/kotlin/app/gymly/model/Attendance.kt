@@ -11,9 +11,9 @@ class Attendance(
     val id: Int? = null,
 
     @Column(name = "user_id", nullable = false)
-    val userId: Int,
+    var userId: Int,
 
     @Column(name = "date", insertable = false, updatable = false)
-    val date: OffsetDateTime? = null
+    var date: OffsetDateTime? = null
 )
 

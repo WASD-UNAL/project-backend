@@ -2,7 +2,7 @@ package app.gymly.dto.membership
 
 import java.math.BigDecimal
 
-data class PlanResponseDTO(
+data class PlanResponse(
     val id: Int?,
     val name: String,
     val description: String?,

@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.Size
 import java.math.BigDecimal
 
-data class PlanUpdateDTO(
+data class PlanUpdate(
     @field:Size(max = 100, message = "El nombre no puede superar los 100 caracteres")
     val name: String? = null,
 

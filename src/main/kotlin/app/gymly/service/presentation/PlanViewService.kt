@@ -1,6 +1,6 @@
 package app.gymly.service.presentation
 
-import app.gymly.dto.membership.PlanResponseDTO
+import app.gymly.dto.membership.PlanResponse
 import app.gymly.model.Plan
 import app.gymly.repository.PlanRepository
 import org.springframework.stereotype.Service
@@ -8,23 +8,22 @@ import org.springframework.stereotype.Service
 @Service
 class PlanViewService(private val planRepository: PlanRepository) {
 
-    fun getActivePlans(): List<PlanResponseDTO> {
+    fun getActivePlans(): List<PlanResponse> {
         return planRepository.findByActiveTrue().map { toResponseDTO(it) }
     }
 
-    fun getPlanById(id: Int): PlanResponseDTO? {
-        val plan = planRepository.findById(id).orElse(null) ?: return null
-        return toResponseDTO(plan)
+    fun getPlanById(id: Int): PlanResponse? {
+        return planRepository.findById(id).map { toResponseDTO(it) }.orElse(null)
     }
 
-    private fun toResponseDTO(entity: Plan): PlanResponseDTO {
-        return PlanResponseDTO(
-            id = entity.id,
-            name = entity.name,
-            description = entity.description,
-            durationDays = entity.durationDays,
-            price = entity.price,
-            active = entity.active
+    private fun toResponseDTO(plan: Plan): PlanResponse {
+        return PlanResponse(
+            id = plan.id,
+            name = plan.name,
+            description = plan.description,
+            durationDays = plan.durationDays,
+            price = plan.price,
+            active = plan.active
         )
     }
 }
