@@ -2,8 +2,8 @@ package app.gymly.dto.stats
 
 import app.gymly.model.StatPeriod
 
-data class AttendanceStatsResponseDTO(
+data class AttendanceStatsResponse(
     val period: StatPeriod,
     val peakValue: Long,
-    val points: List<StatPointDTO>
+    val points: List<StatPoint>
 )

@@ -1,6 +1,6 @@
 package app.gymly.dto.stats
 
-data class StatPointDTO(
+data class StatPoint(
     val label: String,
     val count: Long
 )

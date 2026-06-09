@@ -1,7 +1,7 @@
 package app.gymly.service.stats
 
-import app.gymly.dto.stats.AttendanceStatsResponseDTO
-import app.gymly.dto.stats.StatPointDTO
+import app.gymly.dto.stats.AttendanceStatsResponse
+import app.gymly.dto.stats.StatPoint
 import app.gymly.model.StatPeriod
 import app.gymly.repository.AttendanceRepository
 import org.springframework.stereotype.Service
@@ -11,7 +11,7 @@ import java.time.temporal.TemporalAdjusters
 @Service
 class AttendanceStatsService(private val attendanceRepository: AttendanceRepository) {
 
-    fun calculateMetrics(period: StatPeriod, offset: Int): AttendanceStatsResponseDTO {
+    fun calculateMetrics(period: StatPeriod, offset: Int): AttendanceStatsResponse {
         val targetDate = when (period) {
             StatPeriod.HOURS_DAY -> LocalDate.now().plusDays(offset.toLong())
             StatPeriod.DAYS_WEEK -> LocalDate.now().plusWeeks(offset.toLong())
@@ -28,14 +28,14 @@ class AttendanceStatsService(private val attendanceRepository: AttendanceReposit
 
         val peakValue = points.maxOfOrNull { it.count } ?: 1L
 
-        return AttendanceStatsResponseDTO(
+        return AttendanceStatsResponse(
             period = period,
             peakValue = peakValue,
             points = points
         )
     }
 
-    private fun calculateHoursDay(date: LocalDate): List<StatPointDTO> {
+    private fun calculateHoursDay(date: LocalDate): List<StatPoint> {
         val startOfDay = date.atStartOfDay().atZone(ZoneId.systemDefault()).toOffsetDateTime()
         val endOfDay = date.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toOffsetDateTime()
         val attendances = attendanceRepository.findByDateBetween(startOfDay, endOfDay)
@@ -50,16 +50,16 @@ class AttendanceStatsService(private val attendanceRepository: AttendanceReposit
 
         return operatingHours.map { hour ->
             val count = groupedByHour[hour]?.size?.toLong() ?: 0L
-            StatPointDTO(
+            StatPoint(
                 label = "${String.format("%02d", hour)}:00",
                 count = count
             )
         }
     }
 
-    private fun calculateDaysWeek(date: LocalDate): List<StatPointDTO> {
+    private fun calculateDaysWeek(date: LocalDate): List<StatPoint> {
         val startOfWeek = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).atStartOfDay().atZone(ZoneId.systemDefault()).toOffsetDateTime()
-        val endOfWeek = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toOffsetDateTime()
+        val endOfWeek = startOfWeek.toLocalDate().plusDays(6).atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toOffsetDateTime()
         val attendances = attendanceRepository.findByDateBetween(startOfWeek, endOfWeek)
 
         val groupedByDay = attendances
@@ -68,14 +68,14 @@ class AttendanceStatsService(private val attendanceRepository: AttendanceReposit
 
         return DayOfWeek.entries.map { dayOfWeek ->
             val count = groupedByDay[dayOfWeek]?.size?.toLong() ?: 0L
-            StatPointDTO(
+            StatPoint(
                 label = dayOfWeek.name,
                 count = count
             )
         }
     }
 
-    private fun calculateDaysMonth(date: LocalDate): List<StatPointDTO> {
+    private fun calculateDaysMonth(date: LocalDate): List<StatPoint> {
         val startOfMonth = date.with(TemporalAdjusters.firstDayOfMonth()).atStartOfDay().atZone(ZoneId.systemDefault()).toOffsetDateTime()
         val endOfMonth = date.with(TemporalAdjusters.lastDayOfMonth()).atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toOffsetDateTime()
         val attendances = attendanceRepository.findByDateBetween(startOfMonth, endOfMonth)
@@ -88,14 +88,14 @@ class AttendanceStatsService(private val attendanceRepository: AttendanceReposit
 
         return (1..daysInMonth).map { day ->
             val count = groupedByDayOfMonth[day]?.size?.toLong() ?: 0L
-            StatPointDTO(
+            StatPoint(
                 label = String.format("%02d", day),
                 count = count
             )
         }
     }
 
-    private fun calculateMonthsYear(date: LocalDate): List<StatPointDTO> {
+    private fun calculateMonthsYear(date: LocalDate): List<StatPoint> {
         val startOfYear = date.with(TemporalAdjusters.firstDayOfYear()).atStartOfDay().atZone(ZoneId.systemDefault()).toOffsetDateTime()
         val endOfYear = date.with(TemporalAdjusters.lastDayOfYear()).atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toOffsetDateTime()
         val attendances = attendanceRepository.findByDateBetween(startOfYear, endOfYear)
@@ -106,7 +106,7 @@ class AttendanceStatsService(private val attendanceRepository: AttendanceReposit
 
         return Month.entries.map { month ->
             val count = groupedByMonth[month]?.size?.toLong() ?: 0L
-            StatPointDTO(
+            StatPoint(
                 label = month.name,
                 count = count
             )
