@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 import java.math.BigDecimal
 
-data class PlanCreateDTO(
+data class PlanCreate(
     @field:NotBlank(message = "El nombre es obligatorio")
     @field:Size(max = 100, message = "El nombre no puede superar los 100 caracteres")
     var name: String,

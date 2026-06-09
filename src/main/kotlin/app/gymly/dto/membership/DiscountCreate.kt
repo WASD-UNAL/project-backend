@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull
 import java.math.BigDecimal
 import java.time.LocalDate
 
-data class DiscountCreateDTO(
+data class DiscountCreate(
     @field:NotNull(message = "El porcentaje es obligatorio")
     @field:Min(value = 1, message = "El descuento mínimo es 1%")
     @field:Max(value = 100, message = "El descuento máximo es 100%")

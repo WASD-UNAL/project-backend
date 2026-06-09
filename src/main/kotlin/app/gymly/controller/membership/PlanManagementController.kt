@@ -1,8 +1,8 @@
 package app.gymly.controller.membership
 
-import app.gymly.dto.membership.PlanCreateDTO
-import app.gymly.dto.membership.PlanResponseDTO
-import app.gymly.dto.membership.PlanUpdateDTO
+import app.gymly.dto.membership.PlanCreate
+import app.gymly.dto.membership.PlanResponse
+import app.gymly.dto.membership.PlanUpdate
 import app.gymly.service.membership.PlanManagementService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*
 class PlanManagementController(private val planManagementService: PlanManagementService) {
 
     @PostMapping
-    fun createPlan(@Valid @RequestBody dto: PlanCreateDTO): ResponseEntity<PlanResponseDTO> {
+    fun createPlan(@Valid @RequestBody dto: PlanCreate): ResponseEntity<PlanResponse> {
         val createdPlan = planManagementService.createPlan(dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPlan)
     }
@@ -22,8 +22,8 @@ class PlanManagementController(private val planManagementService: PlanManagement
     @PutMapping("/{id}")
     fun updatePlan(
         @PathVariable id: Int,
-        @Valid @RequestBody dto: PlanUpdateDTO
-    ): ResponseEntity<PlanResponseDTO> {
+        @Valid @RequestBody dto: PlanUpdate
+    ): ResponseEntity<PlanResponse> {
         val updated = planManagementService.updatePlan(id, dto)
         return if (updated != null) {
             ResponseEntity.ok(updated)

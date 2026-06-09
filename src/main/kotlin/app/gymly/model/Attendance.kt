@@ -8,12 +8,12 @@ import java.time.OffsetDateTime
 class Attendance(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int = 0,
+    val id: Int? = null,
 
     @Column(name = "user_id", nullable = false)
-    val userId: Int,
+    var userId: Int,
 
     @Column(name = "date", insertable = false, updatable = false)
-    val date: OffsetDateTime? = null
+    var date: OffsetDateTime? = null
 )
 

@@ -1,8 +1,8 @@
 package app.gymly.service.membership
 
-import app.gymly.dto.membership.DiscountCreateDTO
-import app.gymly.dto.membership.DiscountResponseDTO
-import app.gymly.dto.membership.DiscountUpdateDTO
+import app.gymly.dto.membership.DiscountCreate
+import app.gymly.dto.membership.DiscountResponse
+import app.gymly.dto.membership.DiscountUpdate
 import app.gymly.model.Discount
 import app.gymly.repository.DiscountRepository
 import org.springframework.stereotype.Service
@@ -10,54 +10,51 @@ import org.springframework.stereotype.Service
 @Service
 class DiscountManagementService(private val discountRepository: DiscountRepository) {
 
-    fun createDiscount(dto: DiscountCreateDTO): DiscountResponseDTO {
-        val discount = toEntity(dto)
+    fun createDiscount(discountCreate: DiscountCreate): DiscountResponse {
+        val discount = toEntity(discountCreate)
         val savedDiscount = discountRepository.save(discount)
         return toResponseDTO(savedDiscount)
     }
 
-    fun updateDiscount(id: Int, dto: DiscountUpdateDTO): DiscountResponseDTO? {
+    fun updateDiscount(id: Int, discountUpdate: DiscountUpdate): DiscountResponse? {
         val existingDiscount = discountRepository.findById(id).orElse(null) ?: return null
 
-        dto.percentage?.let { existingDiscount.percentage = it }
-        dto.initDate?.let { existingDiscount.initDate = it }
-        dto.endDate?.let { existingDiscount.endDate = it }
-        dto.active?.let { existingDiscount.active = it }
+        discountUpdate.percentage?.let { existingDiscount.percentage = it }
+        discountUpdate.initDate?.let { existingDiscount.initDate = it }
+        discountUpdate.endDate?.let { existingDiscount.endDate = it }
+        discountUpdate.active?.let { existingDiscount.active = it }
 
         val savedDiscount = discountRepository.save(existingDiscount)
         return toResponseDTO(savedDiscount)
     }
 
     fun deleteDiscount(id: Int): Boolean {
-        return if (discountRepository.existsById(id)) {
-            discountRepository.deleteById(id)
-            true
-        } else {
-            false
-        }
+        if (!discountRepository.existsById(id)) return false
+        discountRepository.deleteById(id)
+        return true
     }
 
-    fun getAllDiscounts(): List<DiscountResponseDTO> {
+    fun getAllDiscounts(): List<DiscountResponse> {
         return discountRepository.findAll().map { toResponseDTO(it) }
     }
 
-    private fun toEntity(dto: DiscountCreateDTO): Discount {
+    private fun toEntity(discountCreate: DiscountCreate): Discount {
         return Discount(
             id = null,
-            percentage = dto.percentage,
-            initDate = dto.initDate,
-            endDate = dto.endDate,
-            active = dto.active
+            percentage = discountCreate.percentage,
+            initDate = discountCreate.initDate,
+            endDate = discountCreate.endDate,
+            active = discountCreate.active
         )
     }
 
-    private fun toResponseDTO(entity: Discount): DiscountResponseDTO {
-        return DiscountResponseDTO(
-            id = entity.id,
-            percentage = entity.percentage,
-            initDate = entity.initDate,
-            endDate = entity.endDate,
-            active = entity.active
+    private fun toResponseDTO(discount: Discount): DiscountResponse {
+        return DiscountResponse(
+            id = discount.id,
+            percentage = discount.percentage,
+            initDate = discount.initDate,
+            endDate = discount.endDate,
+            active = discount.active
         )
     }
 }
