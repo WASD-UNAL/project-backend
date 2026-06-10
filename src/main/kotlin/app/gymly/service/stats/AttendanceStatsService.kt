@@ -11,7 +11,7 @@ import java.time.temporal.TemporalAdjusters
 @Service
 class AttendanceStatsService(private val attendanceRepository: AttendanceRepository) {
 
-    fun calculateMetrics(period: StatPeriod, offset: Int): AttendanceStatsResponse {
+    fun calculateAttendanceMetrics(period: StatPeriod, offset: Int): AttendanceStatsResponse {
         val targetDate = when (period) {
             StatPeriod.HOURS_DAY -> LocalDate.now().plusDays(offset.toLong())
             StatPeriod.DAYS_WEEK -> LocalDate.now().plusWeeks(offset.toLong())

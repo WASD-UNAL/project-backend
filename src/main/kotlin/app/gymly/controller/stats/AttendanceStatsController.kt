@@ -15,7 +15,7 @@ class AttendanceStatsController(private val attendanceStatsService: AttendanceSt
         @RequestParam(defaultValue = "HOURS_DAY") period: StatPeriod,
         @RequestParam(defaultValue = "0") offset: Int
     ): ResponseEntity<AttendanceStatsResponse> {
-        val stats = attendanceStatsService.calculateMetrics(period, offset)
+        val stats = attendanceStatsService.calculateAttendanceMetrics(period, offset)
         return ResponseEntity.ok(stats)
     }
 }
