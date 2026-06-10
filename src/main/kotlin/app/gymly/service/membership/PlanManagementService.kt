@@ -1,8 +1,8 @@
 package app.gymly.service.membership
 
-import app.gymly.dto.membership.PlanCreate
+import app.gymly.dto.membership.PlanRequest
 import app.gymly.dto.membership.PlanResponse
-import app.gymly.dto.membership.PlanUpdate
+import app.gymly.dto.membership.UpdatePlanRequest
 import app.gymly.model.Plan
 import app.gymly.repository.PlanRepository
 import org.springframework.stereotype.Service
@@ -10,20 +10,20 @@ import org.springframework.stereotype.Service
 @Service
 class PlanManagementService(private val planRepository: PlanRepository) {
 
-    fun createPlan(planCreate: PlanCreate): PlanResponse {
-        val plan = toEntity(planCreate)
+    fun createPlan(planRequest: PlanRequest): PlanResponse {
+        val plan = toEntity(planRequest)
         val savedPlan = planRepository.save(plan)
         return toResponseDTO(savedPlan)
     }
 
-    fun updatePlan(id: Int, planUpdate: PlanUpdate): PlanResponse? {
+    fun updatePlan(id: Int, updatePlanRequest: UpdatePlanRequest): PlanResponse? {
         val existingPlan = planRepository.findById(id).orElse(null) ?: return null
 
-        planUpdate.name?.let { existingPlan.name = it }
-        planUpdate.description?.let { existingPlan.description = it }
-        planUpdate.durationDays?.let { existingPlan.durationDays = it }
-        planUpdate.price?.let { existingPlan.price = it }
-        planUpdate.active?.let { existingPlan.active = it }
+        updatePlanRequest.name?.let { existingPlan.name = it }
+        updatePlanRequest.description?.let { existingPlan.description = it }
+        updatePlanRequest.durationDays?.let { existingPlan.durationDays = it }
+        updatePlanRequest.price?.let { existingPlan.price = it }
+        updatePlanRequest.active?.let { existingPlan.active = it }
 
         val savedPlan = planRepository.save(existingPlan)
         return toResponseDTO(savedPlan)
@@ -35,14 +35,14 @@ class PlanManagementService(private val planRepository: PlanRepository) {
         return true
     }
 
-    private fun toEntity(planCreate: PlanCreate): Plan {
+    private fun toEntity(planRequest: PlanRequest): Plan {
         return Plan(
             id = null,
-            name = planCreate.name,
-            description = planCreate.description,
-            durationDays = planCreate.durationDays,
-            price = planCreate.price,
-            active = planCreate.active
+            name = planRequest.name,
+            description = planRequest.description,
+            durationDays = planRequest.durationDays,
+            price = planRequest.price,
+            active = planRequest.active
         )
     }
 
