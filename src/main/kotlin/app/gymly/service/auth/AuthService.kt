@@ -124,7 +124,7 @@ class AuthService(
         id = id ?: error("User id is null"),
         name = name,
         lastname = lastname,
-        email = email ?: "",
+        email = email,
         document = document,
         role = roleName,
         active = active

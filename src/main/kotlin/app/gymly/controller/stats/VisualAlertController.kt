@@ -1,6 +1,6 @@
 package app.gymly.controller.stats
 
-import app.gymly.dto.VisualAlertDTO
+import app.gymly.dto.stats.VisualAlertResponse
 import app.gymly.service.stats.VisualAlertService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*
 class VisualAlertController(private val visualAlertService: VisualAlertService) {
 
     @GetMapping("/{document}")
-    fun getAccessAlert(@PathVariable document: String): ResponseEntity<VisualAlertDTO> {
+    fun getAccessAlert(@PathVariable document: String): ResponseEntity<VisualAlertResponse> {
         val alert = visualAlertService.checkAccessColor(document)
         return ResponseEntity.ok(alert)
     }

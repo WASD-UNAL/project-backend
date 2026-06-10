@@ -1,5 +1,8 @@
 package app.gymly.service.membership
 
+import app.gymly.dto.membership.PlanRequest
+import app.gymly.dto.membership.PlanResponse
+import app.gymly.dto.membership.UpdatePlanRequest
 import app.gymly.model.Plan
 import app.gymly.repository.PlanRepository
 import org.springframework.stereotype.Service
@@ -7,30 +10,50 @@ import org.springframework.stereotype.Service
 @Service
 class PlanManagementService(private val planRepository: PlanRepository) {
 
-    fun createPlan(plan: Plan): Plan {
-        return planRepository.save(plan)
+    fun createPlan(planRequest: PlanRequest): PlanResponse {
+        val plan = toEntity(planRequest)
+        val savedPlan = planRepository.save(plan)
+        return toResponseDTO(savedPlan)
     }
 
-    fun updatePlan(id: Int, updatedPlan: Plan): Plan? {
-        if (!planRepository.existsById(id)) return null
+    fun updatePlan(id: Int, updatePlanRequest: UpdatePlanRequest): PlanResponse? {
+        val existingPlan = planRepository.findById(id).orElse(null) ?: return null
 
-        val planToSave = Plan(
-            id = id,
-            name = updatedPlan.name,
-            description = updatedPlan.description,
-            durationDays = updatedPlan.durationDays,
-            price = updatedPlan.price,
-            active = updatedPlan.active
-        )
-        return planRepository.save(planToSave)
+        updatePlanRequest.name?.let { existingPlan.name = it }
+        updatePlanRequest.description?.let { existingPlan.description = it }
+        updatePlanRequest.durationDays?.let { existingPlan.durationDays = it }
+        updatePlanRequest.price?.let { existingPlan.price = it }
+        updatePlanRequest.active?.let { existingPlan.active = it }
+
+        val savedPlan = planRepository.save(existingPlan)
+        return toResponseDTO(savedPlan)
     }
 
     fun deletePlan(id: Int): Boolean {
-        return if (planRepository.existsById(id)) {
-            planRepository.deleteById(id)
-            true
-        } else {
-            false
-        }
+        if (!planRepository.existsById(id)) return false
+        planRepository.deleteById(id)
+        return true
+    }
+
+    private fun toEntity(planRequest: PlanRequest): Plan {
+        return Plan(
+            id = null,
+            name = planRequest.name,
+            description = planRequest.description,
+            durationDays = planRequest.durationDays,
+            price = planRequest.price,
+            active = planRequest.active
+        )
+    }
+
+    private fun toResponseDTO(plan: Plan): PlanResponse {
+        return PlanResponse(
+            id = plan.id,
+            name = plan.name,
+            description = plan.description,
+            durationDays = plan.durationDays,
+            price = plan.price,
+            active = plan.active
+        )
     }
 }

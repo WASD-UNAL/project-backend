@@ -45,7 +45,7 @@ class JwtService(
             .issuer(issuer)
             .issuedAt(now)
             .expiresAt(refreshExpiresAt)
-            .subject(user.id?.toString() ?: error("User id is null after persistence"))
+            .subject(user.id.toString())
             .build()
 
         val header = JwsHeader.with(MacAlgorithm.HS256).build()
