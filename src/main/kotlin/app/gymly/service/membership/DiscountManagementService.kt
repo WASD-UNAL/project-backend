@@ -1,8 +1,8 @@
 package app.gymly.service.membership
 
-import app.gymly.dto.membership.DiscountCreate
+import app.gymly.dto.membership.DiscountRequest
 import app.gymly.dto.membership.DiscountResponse
-import app.gymly.dto.membership.DiscountUpdate
+import app.gymly.dto.membership.UpdateDiscountRequest
 import app.gymly.model.Discount
 import app.gymly.repository.DiscountRepository
 import org.springframework.stereotype.Service
@@ -10,19 +10,19 @@ import org.springframework.stereotype.Service
 @Service
 class DiscountManagementService(private val discountRepository: DiscountRepository) {
 
-    fun createDiscount(discountCreate: DiscountCreate): DiscountResponse {
-        val discount = toEntity(discountCreate)
+    fun createDiscount(discountRequest: DiscountRequest): DiscountResponse {
+        val discount = toEntity(discountRequest)
         val savedDiscount = discountRepository.save(discount)
         return toResponseDTO(savedDiscount)
     }
 
-    fun updateDiscount(id: Int, discountUpdate: DiscountUpdate): DiscountResponse? {
+    fun updateDiscount(id: Int, updateDiscountRequest: UpdateDiscountRequest): DiscountResponse? {
         val existingDiscount = discountRepository.findById(id).orElse(null) ?: return null
 
-        discountUpdate.percentage?.let { existingDiscount.percentage = it }
-        discountUpdate.initDate?.let { existingDiscount.initDate = it }
-        discountUpdate.endDate?.let { existingDiscount.endDate = it }
-        discountUpdate.active?.let { existingDiscount.active = it }
+        updateDiscountRequest.percentage?.let { existingDiscount.percentage = it }
+        updateDiscountRequest.initDate?.let { existingDiscount.initDate = it }
+        updateDiscountRequest.endDate?.let { existingDiscount.endDate = it }
+        updateDiscountRequest.active?.let { existingDiscount.active = it }
 
         val savedDiscount = discountRepository.save(existingDiscount)
         return toResponseDTO(savedDiscount)
@@ -38,13 +38,13 @@ class DiscountManagementService(private val discountRepository: DiscountReposito
         return discountRepository.findAll().map { toResponseDTO(it) }
     }
 
-    private fun toEntity(discountCreate: DiscountCreate): Discount {
+    private fun toEntity(discountRequest: DiscountRequest): Discount {
         return Discount(
             id = null,
-            percentage = discountCreate.percentage,
-            initDate = discountCreate.initDate,
-            endDate = discountCreate.endDate,
-            active = discountCreate.active
+            percentage = discountRequest.percentage,
+            initDate = discountRequest.initDate,
+            endDate = discountRequest.endDate,
+            active = discountRequest.active
         )
     }
 
