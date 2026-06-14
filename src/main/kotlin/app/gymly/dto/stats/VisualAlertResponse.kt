@@ -6,5 +6,5 @@ data class VisualAlertResponse(
     val statusColor: String, // "GREEN", "YELLOW", "RED"
     val daysRemaining: Long,
     val message: String,
-    val userId: Int? = null
+    val userId: Int? = null,
 )

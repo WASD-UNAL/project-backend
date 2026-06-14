@@ -8,5 +8,5 @@ data class PlanResponse(
     val description: String?,
     val durationDays: Int,
     val price: BigDecimal,
-    val active: Boolean
+    val active: Boolean,
 )

@@ -25,9 +25,8 @@ import javax.crypto.spec.SecretKeySpec
 @Configuration
 @EnableMethodSecurity
 class SecurityConfig(
-    @Value($$"${app.jwt.secret}") private val secret: String
+    @Value($$"${app.jwt.secret}") private val secret: String,
 ) {
-
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
@@ -35,12 +34,15 @@ class SecurityConfig(
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
                 auth
-                    .requestMatchers("/auth/**").permitAll()
-                    .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                    .requestMatchers("/admin/**").hasRole(AppConstants.ROLE_ADMIN_UPPER)
-                    .anyRequest().authenticated()
-            }
-            .oauth2ResourceServer { rs ->
+                    .requestMatchers("/auth/**")
+                    .permitAll()
+                    .requestMatchers("/actuator/health", "/actuator/info")
+                    .permitAll()
+                    .requestMatchers("/admin/**")
+                    .hasRole(AppConstants.ROLE_ADMIN_UPPER)
+                    .anyRequest()
+                    .authenticated()
+            }.oauth2ResourceServer { rs ->
                 rs.jwt { jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()) }
             }
         return http.build()

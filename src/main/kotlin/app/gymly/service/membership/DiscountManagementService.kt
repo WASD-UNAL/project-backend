@@ -8,15 +8,19 @@ import app.gymly.repository.DiscountRepository
 import org.springframework.stereotype.Service
 
 @Service
-class DiscountManagementService(private val discountRepository: DiscountRepository) {
-
+class DiscountManagementService(
+    private val discountRepository: DiscountRepository,
+) {
     fun createDiscount(discountRequest: DiscountRequest): DiscountResponse {
         val discount = toEntity(discountRequest)
         val savedDiscount = discountRepository.save(discount)
         return toResponseDTO(savedDiscount)
     }
 
-    fun updateDiscount(id: Int, updateDiscountRequest: UpdateDiscountRequest): DiscountResponse? {
+    fun updateDiscount(
+        id: Int,
+        updateDiscountRequest: UpdateDiscountRequest,
+    ): DiscountResponse? {
         val existingDiscount = discountRepository.findById(id).orElse(null) ?: return null
 
         updateDiscountRequest.percentage?.let { existingDiscount.percentage = it }
@@ -34,27 +38,23 @@ class DiscountManagementService(private val discountRepository: DiscountReposito
         return true
     }
 
-    fun getAllDiscounts(): List<DiscountResponse> {
-        return discountRepository.findAll().map { toResponseDTO(it) }
-    }
+    fun getAllDiscounts(): List<DiscountResponse> = discountRepository.findAll().map { toResponseDTO(it) }
 
-    private fun toEntity(discountRequest: DiscountRequest): Discount {
-        return Discount(
+    private fun toEntity(discountRequest: DiscountRequest): Discount =
+        Discount(
             id = null,
             percentage = discountRequest.percentage,
             initDate = discountRequest.initDate,
             endDate = discountRequest.endDate,
-            active = discountRequest.active
+            active = discountRequest.active,
         )
-    }
 
-    private fun toResponseDTO(discount: Discount): DiscountResponse {
-        return DiscountResponse(
+    private fun toResponseDTO(discount: Discount): DiscountResponse =
+        DiscountResponse(
             id = discount.id,
             percentage = discount.percentage,
             initDate = discount.initDate,
             endDate = discount.endDate,
-            active = discount.active
+            active = discount.active,
         )
-    }
 }

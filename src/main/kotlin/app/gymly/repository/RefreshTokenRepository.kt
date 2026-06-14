@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository
 @Repository
 interface RefreshTokenRepository : JpaRepository<RefreshToken, Int> {
     fun findByToken(token: String): RefreshToken?
+
     fun deleteAllByUserId(userId: Int)
 }
-

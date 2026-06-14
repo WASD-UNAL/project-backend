@@ -9,9 +9,8 @@ import org.springframework.stereotype.Component
 @Component
 class NotificationScheduler(
     private val visualAlertService: VisualAlertService,
-    private val notificationQueueRepository: NotificationQueueRepository
+    private val notificationQueueRepository: NotificationQueueRepository,
 ) {
-
     @Scheduled(cron = "0 0 0 * * ?")
     fun processDailyAlerts() {
         val yellowAlerts = visualAlertService.getCustomersByAlertStatus("YELLOW")
@@ -22,8 +21,8 @@ class NotificationScheduler(
                     NotificationQueue(
                         userId = userId,
                         message = "Tu membresía vencerá en ${alert.daysRemaining} días.",
-                        alertType = "YELLOW"
-                    )
+                        alertType = "YELLOW",
+                    ),
                 )
             }
         }

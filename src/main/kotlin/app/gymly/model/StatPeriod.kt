@@ -4,5 +4,5 @@ enum class StatPeriod {
     HOURS_DAY,
     DAYS_WEEK,
     DAYS_MONTH,
-    MONTHS_YEAR
+    MONTHS_YEAR,
 }

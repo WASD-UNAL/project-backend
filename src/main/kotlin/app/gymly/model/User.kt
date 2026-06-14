@@ -1,6 +1,11 @@
 package app.gymly.model
 
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 import java.time.OffsetDateTime
 
 @Entity
@@ -18,12 +23,12 @@ class User(
     var phone: String? = null,
     @Column(unique = true)
     var email: String,
-    @Column(name = "password_hash",nullable = false)
+    @Column(name = "password_hash", nullable = false)
     var passwordHash: String,
-    @Column(unique = true ,nullable = false)
+    @Column(unique = true, nullable = false)
     var document: String,
     @Column(name = "created_at", insertable = false, updatable = false)
     var createdAt: OffsetDateTime? = null,
     @Column(nullable = false)
-    var active: Boolean = true
+    var active: Boolean = true,
 )

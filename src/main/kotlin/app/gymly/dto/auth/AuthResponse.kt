@@ -8,5 +8,5 @@ data class AuthResponse(
     val expiresAt: Instant,
     val refreshToken: String,
     val refreshExpiresAt: Instant,
-    val user: UserResponse
+    val user: UserResponse,
 )

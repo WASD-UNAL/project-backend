@@ -17,22 +17,23 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/auth")
-class AuthController(private val authService: AuthService) {
-
+class AuthController(
+    private val authService: AuthService,
+) {
     @PostMapping("/login")
-    fun login(@Valid @RequestBody request: LoginRequest): ResponseEntity<AuthResponse> {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authService.login(request))
-    }
+    fun login(
+        @Valid @RequestBody request: LoginRequest,
+    ): ResponseEntity<AuthResponse> = ResponseEntity.status(HttpStatus.CREATED).body(authService.login(request))
 
     @PostMapping("/register")
-    fun register(@Valid @RequestBody request: RegisterRequest): ResponseEntity<AuthResponse> {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerClient(request))
-    }
+    fun register(
+        @Valid @RequestBody request: RegisterRequest,
+    ): ResponseEntity<AuthResponse> = ResponseEntity.status(HttpStatus.CREATED).body(authService.registerClient(request))
 
     @PostMapping("/refresh")
-    fun refreshToken(@Valid @RequestBody request: RefreshTokenRequest): ResponseEntity<AuthResponse> {
-        return ResponseEntity.ok(authService.refreshAccessToken(request))
-    }
+    fun refreshToken(
+        @Valid @RequestBody request: RefreshTokenRequest,
+    ): ResponseEntity<AuthResponse> = ResponseEntity.ok(authService.refreshAccessToken(request))
 
     @PostMapping("/logout")
     fun logout(authentication: Authentication): ResponseEntity<LogoutResponse> {
