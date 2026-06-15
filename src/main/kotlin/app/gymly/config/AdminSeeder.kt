@@ -13,27 +13,28 @@ import org.springframework.stereotype.Component
 
 @Order(2)
 @Component
-class DatabaseSeeder(
+class AdminSeeder(
     private val userRepository: UserRepository,
     private val roleRepository: RoleRepository,
     private val passwordEncoder: PasswordEncoder,
-    @Value($$"${admin.password}") private val password: String
+    @Value($$"${admin.password}") private val password: String,
 ) : CommandLineRunner {
-
     override fun run(vararg args: String) {
-        val adminRole = roleRepository.findByName(AppConstants.ROLE_ADMIN)
-            ?: roleRepository.save(Role(name = AppConstants.ROLE_ADMIN))
+        val adminRole =
+            roleRepository.findByName(AppConstants.ROLE_ADMIN)
+                ?: roleRepository.save(Role(name = AppConstants.ROLE_ADMIN))
 
         if (userRepository.count() == 0L) {
-            val firstAdmin = User(
-                name = "Admin",
-                lastname = "Supremo",
-                email = "admin@sistema.com",
-                document = "1002220000",
-                passwordHash = passwordEncoder.encode(password)!!,
-                roleId = adminRole.id ?: error("Role ID no generado"),
-                active = true
-            )
+            val firstAdmin =
+                User(
+                    name = "Admin",
+                    lastname = "Supremo",
+                    email = "admin@sistema.com",
+                    document = "1002220000",
+                    passwordHash = passwordEncoder.encode(password)!!,
+                    roleId = adminRole.id ?: error("Role ID no generado"),
+                    active = true,
+                )
             userRepository.save(firstAdmin)
         }
     }

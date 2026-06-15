@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class GymlyApplication
 
 fun main(args: Array<String>) {
-	runApplication<GymlyApplication>(*args)
+    runApplication<GymlyApplication>(*args)
 }

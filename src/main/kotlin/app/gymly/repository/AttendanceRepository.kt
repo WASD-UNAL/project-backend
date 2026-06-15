@@ -7,6 +7,8 @@ import java.time.OffsetDateTime
 
 @Repository
 interface AttendanceRepository : JpaRepository<Attendance, Int> {
-    fun findByDateBetween(start: OffsetDateTime, end: OffsetDateTime): List<Attendance>
+    fun findByDateBetween(
+        start: OffsetDateTime,
+        end: OffsetDateTime,
+    ): List<Attendance>
 }
-

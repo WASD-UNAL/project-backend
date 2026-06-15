@@ -27,17 +27,17 @@ class AuthService(
     private val roleRepository: RoleRepository,
     private val refreshTokenRepository: RefreshTokenRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val jwtService: JwtService
+    private val jwtService: JwtService,
 ) {
-
-
     @Transactional(readOnly = true)
     fun login(request: LoginRequest): AuthResponse {
         val user = findByIdentifier(request.identifier) ?: throw InvalidCredentialsException()
         if (!user.active) throw InvalidCredentialsException()
         if (!passwordEncoder.matches(request.password, user.passwordHash)) throw InvalidCredentialsException()
-        val role = roleRepository.findById(user.roleId)
-            .orElseThrow { RoleNotConfiguredException("roleId=${user.roleId}") }
+        val role =
+            roleRepository
+                .findById(user.roleId)
+                .orElseThrow { RoleNotConfiguredException("roleId=${user.roleId}") }
         return buildAuthResponse(user, role)
     }
 
@@ -57,18 +57,23 @@ class AuthService(
 
     @Transactional
     fun refreshAccessToken(request: RefreshTokenRequest): AuthResponse {
-        val refreshToken = refreshTokenRepository.findByToken(request.refreshToken)
-            ?: throw InvalidCredentialsException("Invalid refresh token")
+        val refreshToken =
+            refreshTokenRepository.findByToken(request.refreshToken)
+                ?: throw InvalidCredentialsException("Invalid refresh token")
 
         if (refreshToken.expiresAt.isBefore(Instant.now())) {
             throw InvalidCredentialsException("Refresh token has expired")
         }
 
-        val user = userRepository.findById(refreshToken.userId)
-            .orElseThrow { InvalidCredentialsException("User not found") }
+        val user =
+            userRepository
+                .findById(refreshToken.userId)
+                .orElseThrow { InvalidCredentialsException("User not found") }
 
-        val role = roleRepository.findById(user.roleId)
-            .orElseThrow { RoleNotConfiguredException("roleId=${user.roleId}") }
+        val role =
+            roleRepository
+                .findById(user.roleId)
+                .orElseThrow { RoleNotConfiguredException("roleId=${user.roleId}") }
 
         return buildAuthResponse(user, role)
     }
@@ -86,29 +91,40 @@ class AuthService(
         return userRepository.findByDocument(trimmed) ?: userRepository.findByEmail(trimmed)
     }
 
-    private fun createUser(role: Role, name: String, lastName: String, email: String, document: String, rawPassword: String): User {
-        val user = User(
-            roleId = role.id ?: throw RoleNotConfiguredException(role.name),
-            name = name,
-            lastname = lastName,
-            email = email,
-            passwordHash = passwordEncoder.encode(rawPassword) ?: throw RuntimeException("Password encoding failed"),
-            document = document.trim()
-        )
+    private fun createUser(
+        role: Role,
+        name: String,
+        lastName: String,
+        email: String,
+        document: String,
+        rawPassword: String,
+    ): User {
+        val user =
+            User(
+                roleId = role.id ?: throw RoleNotConfiguredException(role.name),
+                name = name,
+                lastname = lastName,
+                email = email,
+                passwordHash = passwordEncoder.encode(rawPassword) ?: throw RuntimeException("Password encoding failed"),
+                document = document.trim(),
+            )
         return userRepository.save(user)
     }
 
-
-    private fun buildAuthResponse(user: User, role: Role): AuthResponse {
+    private fun buildAuthResponse(
+        user: User,
+        role: Role,
+    ): AuthResponse {
         val issued = jwtService.issue(user, role.name)
 
         // Guardar refresh token en BD
-        val refreshTokenEntity = RefreshToken(
-            userId = user.id ?: throw RuntimeException("User id is null"),
-            token = issued.refreshToken,
-            expiresAt = issued.refreshExpiresAt,
-            createdAt = Instant.now()
-        )
+        val refreshTokenEntity =
+            RefreshToken(
+                userId = user.id ?: throw RuntimeException("User id is null"),
+                token = issued.refreshToken,
+                expiresAt = issued.refreshExpiresAt,
+                createdAt = Instant.now(),
+            )
         refreshTokenRepository.save(refreshTokenEntity)
 
         return AuthResponse(
@@ -116,17 +132,18 @@ class AuthService(
             expiresAt = issued.expiresAt,
             refreshToken = issued.refreshToken,
             refreshExpiresAt = issued.refreshExpiresAt,
-            user = user.toResponse(role.name)
+            user = user.toResponse(role.name),
         )
     }
 
-    private fun User.toResponse(roleName: String): UserResponse = UserResponse(
-        id = id ?: error("User id is null"),
-        name = name,
-        lastname = lastname,
-        email = email,
-        document = document,
-        role = roleName,
-        active = active
-    )
+    private fun User.toResponse(roleName: String): UserResponse =
+        UserResponse(
+            id = id ?: error("User id is null"),
+            name = name,
+            lastname = lastname,
+            email = email,
+            document = document,
+            role = roleName,
+            active = active,
+        )
 }

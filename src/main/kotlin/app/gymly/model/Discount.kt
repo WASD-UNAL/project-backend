@@ -15,17 +15,12 @@ class Discount(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null,
-
     @Column(nullable = false, precision = 5, scale = 2)
     var percentage: BigDecimal,
-
     @Column(name = "init_date", nullable = false)
     var initDate: LocalDate,
-
     @Column(name = "end_date", nullable = false)
     var endDate: LocalDate,
-
     @Column(nullable = false)
-    var active: Boolean = true
+    var active: Boolean = true,
 )
-

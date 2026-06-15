@@ -7,14 +7,23 @@ import app.gymly.service.membership.PlanManagementService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/membership/plans")
-class PlanManagementController(private val planManagementService: PlanManagementService) {
-
+class PlanManagementController(
+    private val planManagementService: PlanManagementService,
+) {
     @PostMapping
-    fun createPlan(@Valid @RequestBody planRequest: PlanRequest): ResponseEntity<PlanResponse> {
+    fun createPlan(
+        @Valid @RequestBody planRequest: PlanRequest,
+    ): ResponseEntity<PlanResponse> {
         val createdPlan = planManagementService.createPlan(planRequest)
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPlan)
     }
@@ -22,7 +31,7 @@ class PlanManagementController(private val planManagementService: PlanManagement
     @PutMapping("/{id}")
     fun updatePlan(
         @PathVariable id: Int,
-        @Valid @RequestBody updatePlanRequest: UpdatePlanRequest
+        @Valid @RequestBody updatePlanRequest: UpdatePlanRequest,
     ): ResponseEntity<PlanResponse> {
         val updated = planManagementService.updatePlan(id, updatePlanRequest)
         return if (updated != null) {
@@ -33,7 +42,9 @@ class PlanManagementController(private val planManagementService: PlanManagement
     }
 
     @DeleteMapping("/{id}")
-    fun deletePlan(@PathVariable id: Int): ResponseEntity<Unit> {
+    fun deletePlan(
+        @PathVariable id: Int,
+    ): ResponseEntity<Unit> {
         val deleted = planManagementService.deletePlan(id)
         return if (deleted) {
             ResponseEntity.noContent().build()

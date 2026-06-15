@@ -8,5 +8,5 @@ data class DiscountResponse(
     val percentage: BigDecimal,
     val initDate: LocalDate,
     val endDate: LocalDate,
-    val active: Boolean
+    val active: Boolean,
 )

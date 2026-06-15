@@ -16,5 +16,5 @@ data class RegisterRequest(
     val document: String,
     @field:NotBlank
     @field:Size(min = 8)
-    val password: String
+    val password: String,
 )

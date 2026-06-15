@@ -6,5 +6,3 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface DiscountRepository : JpaRepository<Discount, Int>
-
-

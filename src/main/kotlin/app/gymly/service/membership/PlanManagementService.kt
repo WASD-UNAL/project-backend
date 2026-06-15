@@ -8,15 +8,19 @@ import app.gymly.repository.PlanRepository
 import org.springframework.stereotype.Service
 
 @Service
-class PlanManagementService(private val planRepository: PlanRepository) {
-
+class PlanManagementService(
+    private val planRepository: PlanRepository,
+) {
     fun createPlan(planRequest: PlanRequest): PlanResponse {
         val plan = toEntity(planRequest)
         val savedPlan = planRepository.save(plan)
         return toResponseDTO(savedPlan)
     }
 
-    fun updatePlan(id: Int, updatePlanRequest: UpdatePlanRequest): PlanResponse? {
+    fun updatePlan(
+        id: Int,
+        updatePlanRequest: UpdatePlanRequest,
+    ): PlanResponse? {
         val existingPlan = planRepository.findById(id).orElse(null) ?: return null
 
         updatePlanRequest.name?.let { existingPlan.name = it }
@@ -35,25 +39,23 @@ class PlanManagementService(private val planRepository: PlanRepository) {
         return true
     }
 
-    private fun toEntity(planRequest: PlanRequest): Plan {
-        return Plan(
+    private fun toEntity(planRequest: PlanRequest): Plan =
+        Plan(
             id = null,
             name = planRequest.name,
             description = planRequest.description,
             durationDays = planRequest.durationDays,
             price = planRequest.price,
-            active = planRequest.active
+            active = planRequest.active,
         )
-    }
 
-    private fun toResponseDTO(plan: Plan): PlanResponse {
-        return PlanResponse(
+    private fun toResponseDTO(plan: Plan): PlanResponse =
+        PlanResponse(
             id = plan.id,
             name = plan.name,
             description = plan.description,
             durationDays = plan.durationDays,
             price = plan.price,
-            active = plan.active
+            active = plan.active,
         )
-    }
 }

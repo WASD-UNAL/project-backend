@@ -1,6 +1,11 @@
 package app.gymly.model
 
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -9,22 +14,16 @@ import java.time.OffsetDateTime
 class Membership(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null,
-
     @Column(name = "user_id", nullable = false)
     var userId: Int,
-
     @Column(name = "plan_id", nullable = false)
     var planId: Int,
-
     @Column(name = "init_date", nullable = false)
     var initDate: LocalDate,
-
     @Column(name = "end_date", nullable = false)
     var endDate: LocalDate,
-
     @Column(nullable = false)
     var status: MembershipStatus = MembershipStatus.ACTIVE,
-
     @Column(name = "created_at", insertable = false, updatable = false)
-    var createdAt: OffsetDateTime? = null
+    var createdAt: OffsetDateTime? = null,
 )
