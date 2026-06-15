@@ -7,5 +7,9 @@ import org.springframework.stereotype.Repository
 @Repository
 interface NotificationQueueRepository : JpaRepository<NotificationQueue, Int> {
     fun findByProcessedFalse(): List<NotificationQueue>
-    fun existsByUserIdAndProcessedFalseAndAlertType(userId: Int, alertType: String): Boolean
+
+    fun existsByUserIdAndProcessedFalseAndAlertType(
+        userId: Int,
+        alertType: String,
+    ): Boolean
 }

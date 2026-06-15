@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
-
     @ExceptionHandler(InvalidCredentialsException::class, BadCredentialsException::class)
     fun handleInvalidCredentials(e: RuntimeException): ResponseEntity<Map<String, Any?>> =
         ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error("invalid_credentials", e.message))
@@ -26,7 +25,8 @@ class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidation(e: MethodArgumentNotValidException): ResponseEntity<Map<String, Any?>> {
         val fields = e.bindingResult.fieldErrors.associate { it.field to (it.defaultMessage ?: "invalid") }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
             .body(mapOf("error" to "validation_failed", "fields" to fields))
     }
 
@@ -34,6 +34,8 @@ class GlobalExceptionHandler {
     fun handleMisconfiguration(e: RoleNotConfiguredException): ResponseEntity<Map<String, Any?>> =
         ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error("server_misconfigured", e.message))
 
-    private fun error(code: String, message: String?): Map<String, Any?> =
-        mapOf("error" to code, "message" to (message ?: code))
+    private fun error(
+        code: String,
+        message: String?,
+    ): Map<String, Any?> = mapOf("error" to code, "message" to (message ?: code))
 }

@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/admin/user")
 @PreAuthorize("hasRole('${AppConstants.ROLE_ADMIN_UPPER}')")
-class AdminUserController(private val authService: AuthService) {
-
+class AdminUserController(
+    private val authService: AuthService,
+) {
     @PostMapping("/register")
-    fun createAdmin(@Valid @RequestBody request: CreateAdminRequest): ResponseEntity<UserResponse> =
-        ResponseEntity.status(HttpStatus.CREATED).body(authService.createAdmin(request))
+    fun createAdmin(
+        @Valid @RequestBody request: CreateAdminRequest,
+    ): ResponseEntity<UserResponse> = ResponseEntity.status(HttpStatus.CREATED).body(authService.createAdmin(request))
 }

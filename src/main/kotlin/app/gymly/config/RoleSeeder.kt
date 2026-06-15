@@ -10,8 +10,9 @@ import org.springframework.stereotype.Component
 
 @Order(1)
 @Component
-class RoleSeeder(private val roleRepository: RoleRepository) : ApplicationRunner {
-
+class RoleSeeder(
+    private val roleRepository: RoleRepository,
+) : ApplicationRunner {
     override fun run(args: ApplicationArguments) {
         listOf(AppConstants.ROLE_CLIENT, AppConstants.ROLE_ADMIN).forEach { name ->
             if (roleRepository.findByName(name) == null) {

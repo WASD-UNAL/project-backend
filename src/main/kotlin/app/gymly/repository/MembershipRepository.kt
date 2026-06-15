@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface MembershipRepository : JpaRepository<Membership, Int> {
-	fun findFirstByUserIdOrderByEndDateDesc(userId: Int): Membership?
+    fun findFirstByUserIdOrderByEndDateDesc(userId: Int): Membership?
 }

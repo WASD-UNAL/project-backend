@@ -7,14 +7,24 @@ import app.gymly.service.membership.DiscountManagementService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/membership/discounts")
-class DiscountManagementController(private val discountManagementService: DiscountManagementService) {
-
+class DiscountManagementController(
+    private val discountManagementService: DiscountManagementService,
+) {
     @PostMapping
-    fun createDiscount(@Valid @RequestBody discountRequest: DiscountRequest): ResponseEntity<DiscountResponse> {
+    fun createDiscount(
+        @Valid @RequestBody discountRequest: DiscountRequest,
+    ): ResponseEntity<DiscountResponse> {
         val createdDiscount = discountManagementService.createDiscount(discountRequest)
         return ResponseEntity.status(HttpStatus.CREATED).body(createdDiscount)
     }
@@ -28,7 +38,7 @@ class DiscountManagementController(private val discountManagementService: Discou
     @PutMapping("/{id}")
     fun updateDiscount(
         @PathVariable id: Int,
-        @Valid @RequestBody updateDiscountRequest: UpdateDiscountRequest
+        @Valid @RequestBody updateDiscountRequest: UpdateDiscountRequest,
     ): ResponseEntity<DiscountResponse> {
         val updated = discountManagementService.updateDiscount(id, updateDiscountRequest)
         return if (updated != null) {
@@ -39,7 +49,9 @@ class DiscountManagementController(private val discountManagementService: Discou
     }
 
     @DeleteMapping("/{id}")
-    fun deleteDiscount(@PathVariable id: Int): ResponseEntity<Unit> {
+    fun deleteDiscount(
+        @PathVariable id: Int,
+    ): ResponseEntity<Unit> {
         val deleted = discountManagementService.deleteDiscount(id)
         return if (deleted) {
             ResponseEntity.noContent().build()
@@ -48,4 +60,3 @@ class DiscountManagementController(private val discountManagementService: Discou
         }
     }
 }
-
