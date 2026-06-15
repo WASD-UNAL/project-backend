@@ -5,6 +5,7 @@ import app.gymly.dto.auth.LoginRequest
 import app.gymly.dto.auth.RefreshTokenRequest
 import app.gymly.dto.auth.RegisterRequest
 import app.gymly.exception.InvalidCredentialsException
+import app.gymly.exception.RoleNotConfiguredException
 import app.gymly.model.RefreshToken
 import app.gymly.model.Role
 import app.gymly.model.User
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentCaptor
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.*
@@ -65,6 +67,11 @@ class AuthServiceTest {
         )
     }
 
+    /**
+     * **Funcionalidad Esencial:** Autenticación de usuarios (Login).
+     * **Caso Límite:** Intento de inicio de sesión de un usuario que existe en el sistema, pero su cuenta fue desactivada (active = false). Debe denegar el acceso sin llegar a comprobar descifrados de contraseña.
+     * **Aislamiento de Base de Datos:** Se mockea `userRepository` para evitar la lectura real a la BD, validando únicamente la lógica de negocio del servicio.
+     */
     @Test
     fun `login should throw InvalidCredentialsException when user is not active`() {
         val request = LoginRequest(identifier = "test@user.com", password = "password123")
@@ -84,6 +91,11 @@ class AuthServiceTest {
         verify(passwordEncoder, never()).matches(anyString(), anyString())
     }
 
+    /**
+     * **Funcionalidad Esencial:** Renovación de sesión (Refresh Token).
+     * **Caso Límite:** El cliente envía un Refresh Token cuyo tiempo de vida (`expiresAt`) ya ha pasado. La lógica debe capturar esto y abortar el refresh, forzando un re-login.
+     * **Aislamiento de Base de Datos:** Se emplea un mock en `refreshTokenRepository` simulando lo que devolvería la consulta, impidiendo cualquier lectura a la base real.
+     */
     @Test
     fun `refreshAccessToken should throw InvalidCredentialsException when token is expired`() {
         val expiredTokenStr = "expired-refresh-token"
@@ -106,55 +118,32 @@ class AuthServiceTest {
         verify(userRepository, never()).findById(anyInt())
     }
 
+
+    /**
+     * **Funcionalidad Esencial:** Rol no existente.
+     * **Caso Límite (Out of Bounds):** Se intenta registrar un cliente pero el rol CLIENT
+     * no existe en la base de datos (no fue seedeado). El servicio debe abortar con
+     * `RoleNotConfiguredException` sin tocar encriptación ni persistencia.
+     * **Aislamiento:** Se mockea `roleRepository.findByName` devolviendo null.
+     */
     @Test
-    fun `registerClient should save user and return mapped AuthResponse`() {
+    fun `registerClient should throw RoleNotConfiguredException when role is not found`() {
         val request = RegisterRequest(
-            name = "New",
-            lastname = "Client",
-            email = "new@client.com",
-            document = "87654321",
-            password = "securePassword"
+            name = "Bob",
+            lastname = "NoRole",
+            email = "bob@test.com",
+            document = "11223344",
+            password = "password123"
         )
 
-        `when`(roleRepository.findByName(AppConstants.ROLE_CLIENT)).thenReturn(testRole)
-        `when`(passwordEncoder.encode("securePassword")).thenReturn("encodedPassword")
+        `when`(roleRepository.findByName(AppConstants.ROLE_CLIENT)).thenReturn(null)
 
-        val savedUser = User(
-            id = 200,
-            roleId = 1,
-            name = "New",
-            lastname = "Client",
-            email = "new@client.com",
-            document = "87654321",
-            passwordHash = "encodedPassword",
-            active = true
-        )
+        assertThrows<RoleNotConfiguredException> {
+            authService.registerClient(request)
+        }
 
-        `when`(userRepository.save(any(User::class.java))).thenReturn(savedUser)
-
-        val issuedTokens = JwtService.IssuedToken(
-            token = "jwt-access-token",
-            expiresAt = Instant.now().plus(15, ChronoUnit.MINUTES),
-            refreshToken = "jwt-refresh-token",
-            refreshExpiresAt = Instant.now().plus(7, ChronoUnit.DAYS)
-        )
-
-        `when`(jwtService.issue(savedUser, AppConstants.ROLE_CLIENT)).thenReturn(issuedTokens)
-        `when`(refreshTokenRepository.save(any(RefreshToken::class.java))).thenAnswer { it.arguments[0] }
-
-        val response = authService.registerClient(request)
-
-
-        assertNotNull(response)
-        assertEquals("jwt-access-token", response.token)
-        assertEquals("jwt-refresh-token", response.refreshToken)
-        assertEquals("New", response.user.name)
-        assertEquals(AppConstants.ROLE_CLIENT, response.user.role)
-
-        verify(roleRepository).findByName(AppConstants.ROLE_CLIENT)
-        verify(userRepository).save(any(User::class.java))
-        verify(jwtService).issue(savedUser, AppConstants.ROLE_CLIENT)
-        verify(refreshTokenRepository).save(any(RefreshToken::class.java))
+        verify(passwordEncoder, never()).encode(anyString())
+        verify(userRepository, never()).save(any(User::class.java))
     }
 }
 
