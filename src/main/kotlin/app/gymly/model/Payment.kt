@@ -16,19 +16,19 @@ class Payment(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null,
     @Column(name = "membership_id", nullable = false)
-    val membershipId: Int,
+    var membershipId: Int,
     @Column(name = "user_id", nullable = false)
-    val userId: Int,
+    var userId: Int,
     @Column(name = "discount_id")
-    val discountId: Int? = null,
+    var discountId: Int? = null,
     @Column(nullable = false, precision = 10, scale = 2)
-    val amount: BigDecimal,
+    var amount: BigDecimal,
     @Column(nullable = false)
-    val method: PaymentMethod = PaymentMethod.CASH,
+    var method: PaymentMethod = PaymentMethod.CASH,
     @Column(columnDefinition = "TEXT")
-    val reference: String? = null,
+    var reference: String? = null,
     @Column(nullable = false)
-    val status: PaymentStatus = PaymentStatus.PENDING,
+    var status: PaymentStatus = PaymentStatus.PENDING,
     @Column(name = "created_at", insertable = false, updatable = false)
-    val createdAt: OffsetDateTime? = null,
+    var createdAt: OffsetDateTime? = null,
 )
