@@ -19,8 +19,7 @@ data class PaymentRequest(
     @field:DecimalMin(value = "0.01", message = "El monto debe ser mayor a 0")
     var amount: BigDecimal?,
 
-    @field:NotNull(message = "El método de pago es requerido")
-    var method: PaymentMethod?,
+    var method: PaymentMethod = PaymentMethod.CASH,
 
     var reference: String? = null,
 

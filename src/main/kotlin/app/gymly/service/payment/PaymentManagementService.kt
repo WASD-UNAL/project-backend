@@ -59,7 +59,7 @@ class PaymentManagementService(private val paymentRepository: PaymentRepository)
             userId = paymentRequest.userId!!,
             discountId = paymentRequest.discountId,
             amount = paymentRequest.amount!!,
-            method = paymentRequest.method!!,
+            method = paymentRequest.method,
             reference = paymentRequest.reference,
             status = paymentRequest.status!!
         )
