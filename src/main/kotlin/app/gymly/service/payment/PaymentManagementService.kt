@@ -5,12 +5,12 @@ import app.gymly.dto.payment.PaymentResponse
 import app.gymly.dto.payment.UpdatePaymentRequest
 import app.gymly.dto.payment.CheckoutResponse
 import app.gymly.model.Payment
-import app.gymly.model.MembershipStatus
 import app.gymly.model.PaymentMethod
 import app.gymly.model.PaymentStatus
 import app.gymly.repository.PaymentRepository
 import app.gymly.repository.PlanRepository
 import app.gymly.repository.MembershipRepository
+import app.gymly.service.membership.MembershipManagementService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException
 @Service
 class PaymentManagementService(
     private val paymentRepository: PaymentRepository,
+    private val membershipManagementService: MembershipManagementService,
     private val membershipRepository: MembershipRepository,
     private val planRepository: PlanRepository,
     private val mercadoPagoService: MercadoPagoService
@@ -41,11 +42,7 @@ class PaymentManagementService(
         val paymentEntity = toEntity(paymentRequest)
         val savedPayment = paymentRepository.save(paymentEntity)
         if (savedPayment.method == PaymentMethod.CASH && savedPayment.status == PaymentStatus.SUCCESSFUL) {
-            val membership = membershipRepository.findByIdOrNull(savedPayment.membershipId)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Membresía con ID ${savedPayment.membershipId} no encontrada")
-
-            membership.status = MembershipStatus.ACTIVE
-            membershipRepository.save(membership)
+            membershipManagementService.activateMembership(savedPayment.membershipId)
         }
         return toResponse(savedPayment)
     }
