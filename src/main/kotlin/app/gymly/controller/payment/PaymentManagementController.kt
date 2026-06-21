@@ -2,6 +2,7 @@ package app.gymly.controller.payment
 
 import app.gymly.dto.payment.PaymentRequest
 import app.gymly.dto.payment.PaymentResponse
+import app.gymly.dto.payment.CheckoutResponse
 import app.gymly.dto.payment.UpdatePaymentRequest
 import app.gymly.service.payment.PaymentManagementService
 import jakarta.validation.Valid
@@ -29,6 +30,12 @@ class PaymentManagementController(private val paymentService: PaymentManagementS
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPayment)
     }
 
+    @PostMapping("/checkout")
+    fun createCheckout(@Valid @RequestBody paymentRequest: PaymentRequest): ResponseEntity<CheckoutResponse> {
+        val checkoutResponse = paymentService.createCheckout(paymentRequest)
+        return ResponseEntity.status(HttpStatus.CREATED).body(checkoutResponse)
+    }
+
     @PutMapping("/{id}")
     fun updatePayment(
         @PathVariable id: Int,
@@ -38,7 +45,7 @@ class PaymentManagementController(private val paymentService: PaymentManagementS
     }
 
     @DeleteMapping("/{id}")
-    fun deletePayment(@PathVariable id: Int): ResponseEntity<Void> {
+    fun deletePayment(@PathVariable id: Int): ResponseEntity<Unit> {
         paymentService.deletePayment(id)
         return ResponseEntity.noContent().build()
     }

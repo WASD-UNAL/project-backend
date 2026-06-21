@@ -26,3 +26,6 @@ app:
 
 admin:
   password: ${ADMIN_RAW_PASSWORD}
+
+mercadopago:
+  access-token: ${MERCADOPAGO_ACCESS_TOKEN}
