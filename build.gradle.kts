@@ -11,6 +11,7 @@ group = "app"
 version = "0.0.1-SNAPSHOT"
 
 val mockitoKotlinVersion = "5.4.0"
+val mercadoPagoVersion = "2.9.2"
 
 java {
     toolchain {
@@ -36,6 +37,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     implementation("tools.jackson.module:jackson-module-kotlin")
+    implementation("com.mercadopago:sdk-java:$mercadoPagoVersion")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
