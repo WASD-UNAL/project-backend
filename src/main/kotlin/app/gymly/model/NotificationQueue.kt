@@ -15,13 +15,13 @@ class NotificationQueue(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null,
     @Column(name = "user_id", nullable = false)
-    val userId: Int,
+    var userId: Int,
     @Column(nullable = false)
-    val message: String,
+    var message: String,
     @Column(name = "alert_type", nullable = false)
-    val alertType: String,
+    var alertType: String,
     @Column(nullable = false)
     var processed: Boolean = false,
     @Column(name = "created_at", nullable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    var createdAt: LocalDateTime = LocalDateTime.now(),
 )
