@@ -3,15 +3,26 @@ package app.gymly.service.payment
 import app.gymly.dto.payment.PaymentRequest
 import app.gymly.dto.payment.PaymentResponse
 import app.gymly.dto.payment.UpdatePaymentRequest
+import app.gymly.dto.payment.CheckoutResponse
 import app.gymly.model.Payment
+import app.gymly.model.MembershipStatus
+import app.gymly.model.PaymentMethod
+import app.gymly.model.PaymentStatus
 import app.gymly.repository.PaymentRepository
+import app.gymly.repository.PlanRepository
+import app.gymly.repository.MembershipRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ResponseStatusException
 
 @Service
-class PaymentManagementService(private val paymentRepository: PaymentRepository) {
+class PaymentManagementService(
+    private val paymentRepository: PaymentRepository,
+    private val membershipRepository: MembershipRepository,
+    private val planRepository: PlanRepository,
+    private val mercadoPagoService: MercadoPagoService
+) {
 
     @Transactional(readOnly = true)
     fun getAllPayments(): List<PaymentResponse> {
@@ -29,7 +40,38 @@ class PaymentManagementService(private val paymentRepository: PaymentRepository)
     fun createPayment(paymentRequest: PaymentRequest): PaymentResponse {
         val paymentEntity = toEntity(paymentRequest)
         val savedPayment = paymentRepository.save(paymentEntity)
+        if (savedPayment.method == PaymentMethod.CASH && savedPayment.status == PaymentStatus.SUCCESSFUL) {
+            val membership = membershipRepository.findByIdOrNull(savedPayment.membershipId)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Membresía con ID ${savedPayment.membershipId} no encontrada")
+
+            membership.status = MembershipStatus.ACTIVE
+            membershipRepository.save(membership)
+        }
         return toResponse(savedPayment)
+    }
+
+    @Transactional
+    fun createCheckout(paymentRequest: PaymentRequest): CheckoutResponse {
+        val membership = membershipRepository.findByIdOrNull(paymentRequest.membershipId!!)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Membresía con ID ${paymentRequest.membershipId} no encontrada")
+
+        val plan = planRepository.findByIdOrNull(membership.planId)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Plan con ID ${membership.planId} no encontrado")
+
+        val conceptName = "You are paying: ${plan.name}"
+
+        val paymentEntity = toEntity(paymentRequest).apply {
+            status = PaymentStatus.PENDING
+        }
+
+        val savedPayment = paymentRepository.save(paymentEntity)
+
+        val checkoutUrl = mercadoPagoService.createPaymentLink(conceptName, savedPayment.amount, savedPayment.id.toString())
+
+        return CheckoutResponse(
+            paymentId = savedPayment.id ?: 0,
+            checkoutUrl = checkoutUrl
+        )
     }
 
     @Transactional
