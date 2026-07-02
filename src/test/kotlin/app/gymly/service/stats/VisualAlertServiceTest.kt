@@ -17,7 +17,6 @@ import org.mockito.kotlin.whenever
 import java.time.LocalDate
 
 class VisualAlertServiceTest {
-
     private lateinit var userRepository: UserRepository
     private lateinit var membershipRepository: MembershipRepository
     private lateinit var service: VisualAlertService
@@ -29,12 +28,11 @@ class VisualAlertServiceTest {
         service = VisualAlertService(userRepository, membershipRepository)
     }
 
-
     private fun buildUser(
         id: Int? = 1,
         name: String = "Juan",
         lastname: String = "Perez",
-        document: String = "1001"
+        document: String = "1001",
     ) = User(
         id = id,
         roleId = 1,
@@ -42,20 +40,20 @@ class VisualAlertServiceTest {
         lastname = lastname,
         email = "juan@gymly.app",
         passwordHash = "hash",
-        document = document
+        document = document,
     )
 
     private fun buildMembership(
         endDate: LocalDate,
         status: MembershipStatus = MembershipStatus.ACTIVE,
-        userId: Int = 1
+        userId: Int = 1,
     ) = Membership(
         id = 1,
         userId = userId,
         planId = 1,
         initDate = LocalDate.now().minusMonths(1),
         endDate = endDate,
-        status = status
+        status = status,
     )
 
     @Nested
@@ -93,10 +91,8 @@ class VisualAlertServiceTest {
         }
     }
 
-
     @Nested
     inner class EvaluateMembershipStatus {
-
         @Test
         fun endDateTodayIsStillValid() {
             val user = buildUser()
@@ -128,10 +124,11 @@ class VisualAlertServiceTest {
         @Test
         fun nonActiveStatusOverridesFutureDate() {
             val user = buildUser()
-            val membership = buildMembership(
-                endDate = LocalDate.now().plusDays(30),
-                status = MembershipStatus.FROZEN
-            )
+            val membership =
+                buildMembership(
+                    endDate = LocalDate.now().plusDays(30),
+                    status = MembershipStatus.FROZEN,
+                )
             whenever(userRepository.findByDocument(user.document)).thenReturn(user)
             whenever(membershipRepository.findFirstByUserIdOrderByEndDateDesc(user.id!!)).thenReturn(membership)
 

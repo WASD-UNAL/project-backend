@@ -14,5 +14,5 @@ data class PaymentResponse(
     val method: PaymentMethod,
     val reference: String?,
     val status: PaymentStatus,
-    val createdAt: OffsetDateTime?
+    val createdAt: OffsetDateTime?,
 )

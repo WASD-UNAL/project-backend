@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class MercadoPagoConfiguration {
-
     @Value("\${mercadopago.access-token}")
     private lateinit var accessToken: String
 

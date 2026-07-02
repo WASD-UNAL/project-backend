@@ -13,12 +13,10 @@ import app.gymly.repository.RefreshTokenRepository
 import app.gymly.repository.RoleRepository
 import app.gymly.repository.UserRepository
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentCaptor
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.*
@@ -29,7 +27,6 @@ import java.time.temporal.ChronoUnit
 
 @ExtendWith(MockitoExtension::class)
 class AuthServiceTest {
-
     @Mock
     private lateinit var userRepository: UserRepository
 
@@ -54,17 +51,18 @@ class AuthServiceTest {
     @BeforeEach
     fun setup() {
         testRole = Role(id = 1, name = AppConstants.ROLE_CLIENT)
-        testUser = User(
-            id = 100,
-            roleId = 1,
-            name = "Test",
-            lastname = "User",
-            document = "12345678",
-            phone = "5551234",
-            email = "test@user.com",
-            passwordHash = "hashedPassword",
-            active = true
-        )
+        testUser =
+            User(
+                id = 100,
+                roleId = 1,
+                name = "Test",
+                lastname = "User",
+                document = "12345678",
+                phone = "5551234",
+                email = "test@user.com",
+                passwordHash = "hashedPassword",
+                active = true,
+            )
     }
 
     /**
@@ -75,17 +73,25 @@ class AuthServiceTest {
     @Test
     fun `login should throw InvalidCredentialsException when user is not active`() {
         val request = LoginRequest(identifier = "test@user.com", password = "password123")
-        val inactiveUser = User(
-            id = 100, roleId = 1, name = "Test", lastname = "User",
-            document = "12345678", phone = "555-1234", email = "test@user.com",
-            passwordHash = "hashedPassword", active = false
-        )
+        val inactiveUser =
+            User(
+                id = 100,
+                roleId = 1,
+                name = "Test",
+                lastname = "User",
+                document = "12345678",
+                phone = "555-1234",
+                email = "test@user.com",
+                passwordHash = "hashedPassword",
+                active = false,
+            )
 
         `when`(userRepository.findByEmail("test@user.com")).thenReturn(inactiveUser)
 
-        val exception = assertThrows<InvalidCredentialsException> {
-            authService.login(request)
-        }
+        val exception =
+            assertThrows<InvalidCredentialsException> {
+                authService.login(request)
+            }
 
         assertEquals("Invalid credentials", exception.message)
         verify(passwordEncoder, never()).matches(anyString(), anyString())
@@ -100,24 +106,25 @@ class AuthServiceTest {
     fun `refreshAccessToken should throw InvalidCredentialsException when token is expired`() {
         val expiredTokenStr = "expired-refresh-token"
         val request = RefreshTokenRequest(refreshToken = expiredTokenStr)
-        val expiredToken = RefreshToken(
-            id = 1,
-            userId = 100,
-            token = expiredTokenStr,
-            expiresAt = Instant.now().minus(1, ChronoUnit.DAYS),
-            createdAt = Instant.now().minus(8, ChronoUnit.DAYS)
-        )
+        val expiredToken =
+            RefreshToken(
+                id = 1,
+                userId = 100,
+                token = expiredTokenStr,
+                expiresAt = Instant.now().minus(1, ChronoUnit.DAYS),
+                createdAt = Instant.now().minus(8, ChronoUnit.DAYS),
+            )
 
         `when`(refreshTokenRepository.findByToken(expiredTokenStr)).thenReturn(expiredToken)
 
-        val exception = assertThrows<InvalidCredentialsException> {
-            authService.refreshAccessToken(request)
-        }
+        val exception =
+            assertThrows<InvalidCredentialsException> {
+                authService.refreshAccessToken(request)
+            }
 
         assertEquals("Refresh token has expired", exception.message)
         verify(userRepository, never()).findById(anyInt())
     }
-
 
     /**
      * **Funcionalidad Esencial:** Rol no existente.
@@ -128,13 +135,14 @@ class AuthServiceTest {
      */
     @Test
     fun `registerClient should throw RoleNotConfiguredException when role is not found`() {
-        val request = RegisterRequest(
-            name = "Bob",
-            lastname = "NoRole",
-            email = "bob@test.com",
-            document = "11223344",
-            password = "password123"
-        )
+        val request =
+            RegisterRequest(
+                name = "Bob",
+                lastname = "NoRole",
+                email = "bob@test.com",
+                document = "11223344",
+                password = "password123",
+            )
 
         `when`(roleRepository.findByName(AppConstants.ROLE_CLIENT)).thenReturn(null)
 
@@ -146,7 +154,3 @@ class AuthServiceTest {
         verify(userRepository, never()).save(any(User::class.java))
     }
 }
-
-
-
-

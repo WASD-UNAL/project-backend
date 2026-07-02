@@ -1,15 +1,16 @@
 package app.gymly.service.payment
 
+import app.gymly.dto.payment.CheckoutResponse
 import app.gymly.dto.payment.PaymentRequest
 import app.gymly.dto.payment.PaymentResponse
 import app.gymly.dto.payment.UpdatePaymentRequest
-import app.gymly.dto.payment.CheckoutResponse
+import app.gymly.model.MembershipStatus
 import app.gymly.model.Payment
 import app.gymly.model.PaymentMethod
 import app.gymly.model.PaymentStatus
+import app.gymly.repository.MembershipRepository
 import app.gymly.repository.PaymentRepository
 import app.gymly.repository.PlanRepository
-import app.gymly.repository.MembershipRepository
 import app.gymly.service.membership.MembershipManagementService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -22,18 +23,16 @@ class PaymentManagementService(
     private val membershipManagementService: MembershipManagementService,
     private val membershipRepository: MembershipRepository,
     private val planRepository: PlanRepository,
-    private val mercadoPagoService: MercadoPagoService
+    private val mercadoPagoService: MercadoPagoService,
 ) {
-
     @Transactional(readOnly = true)
-    fun getAllPayments(): List<PaymentResponse> {
-        return paymentRepository.findAll().map { toResponse(it) }
-    }
+    fun getAllPayments(): List<PaymentResponse> = paymentRepository.findAll().map { toResponse(it) }
 
     @Transactional(readOnly = true)
     fun getPaymentById(id: Int): PaymentResponse {
-        val payment = paymentRepository.findByIdOrNull(id)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Pago con ID $id no encontrado")
+        val payment =
+            paymentRepository.findByIdOrNull(id)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Pago con ID $id no encontrado")
         return toResponse(payment)
     }
 
@@ -49,17 +48,20 @@ class PaymentManagementService(
 
     @Transactional
     fun createCheckout(paymentRequest: PaymentRequest): CheckoutResponse {
-        val membership = membershipRepository.findByIdOrNull(paymentRequest.membershipId!!)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Membresía con ID ${paymentRequest.membershipId} no encontrada")
+        val membership =
+            membershipRepository.findByIdOrNull(paymentRequest.membershipId!!)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Membresía con ID ${paymentRequest.membershipId} no encontrada")
 
-        val plan = planRepository.findByIdOrNull(membership.planId)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Plan con ID ${membership.planId} no encontrado")
+        val plan =
+            planRepository.findByIdOrNull(membership.planId)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Plan con ID ${membership.planId} no encontrado")
 
         val conceptName = "You are paying: ${plan.name}"
 
-        val paymentEntity = toEntity(paymentRequest).apply {
-            status = PaymentStatus.PENDING
-        }
+        val paymentEntity =
+            toEntity(paymentRequest).apply {
+                status = PaymentStatus.PENDING
+            }
 
         val savedPayment = paymentRepository.save(paymentEntity)
 
@@ -67,14 +69,18 @@ class PaymentManagementService(
 
         return CheckoutResponse(
             paymentId = savedPayment.id ?: 0,
-            checkoutUrl = checkoutUrl
+            checkoutUrl = checkoutUrl,
         )
     }
 
     @Transactional
-    fun updatePayment(id: Int, updatePaymentRequest: UpdatePaymentRequest): PaymentResponse {
-        val existingPayment = paymentRepository.findByIdOrNull(id)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Pago con ID $id no encontrado")
+    fun updatePayment(
+        id: Int,
+        updatePaymentRequest: UpdatePaymentRequest,
+    ): PaymentResponse {
+        val existingPayment =
+            paymentRepository.findByIdOrNull(id)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Pago con ID $id no encontrado")
 
         updatePaymentRequest.amount?.let { existingPayment.amount = it }
         updatePaymentRequest.method?.let { existingPayment.method = it }
@@ -87,8 +93,9 @@ class PaymentManagementService(
 
     @Transactional
     fun deletePayment(id: Int) {
-        val payment = paymentRepository.findByIdOrNull(id)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Pago con ID $id no encontrado")
+        val payment =
+            paymentRepository.findByIdOrNull(id)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Pago con ID $id no encontrado")
         paymentRepository.delete(payment)
     }
 
@@ -100,7 +107,7 @@ class PaymentManagementService(
             amount = paymentRequest.amount!!,
             method = paymentRequest.method,
             reference = paymentRequest.reference,
-            status = paymentRequest.status!!
+            status = paymentRequest.status!!,
         )
 
     private fun toResponse(payment: Payment): PaymentResponse =
@@ -113,6 +120,6 @@ class PaymentManagementService(
             method = payment.method,
             reference = payment.reference,
             status = payment.status,
-            createdAt = payment.createdAt
+            createdAt = payment.createdAt,
         )
 }

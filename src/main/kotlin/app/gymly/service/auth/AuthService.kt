@@ -29,7 +29,7 @@ class AuthService(
     private val passwordEncoder: PasswordEncoder,
     private val jwtService: JwtService,
 ) {
-    @Transactional(readOnly = true)
+    @Transactional
     fun login(request: LoginRequest): AuthResponse {
         val user = findByIdentifier(request.identifier) ?: throw InvalidCredentialsException()
         if (!user.active) throw InvalidCredentialsException()
@@ -117,7 +117,6 @@ class AuthService(
     ): AuthResponse {
         val issued = jwtService.issue(user, role.name)
 
-        // Guardar refresh token en BD
         val refreshTokenEntity =
             RefreshToken(
                 userId = user.id ?: throw RuntimeException("User id is null"),

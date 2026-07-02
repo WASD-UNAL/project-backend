@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS users (
     phone varchar UNIQUE,
     email varchar UNIQUE,
     password_hash text NOT NULL,
+    weighth numeric(5,2),
+    height numeric(5,2),
     created_at timestamptz DEFAULT (now()),
     active boolean DEFAULT true
 );
