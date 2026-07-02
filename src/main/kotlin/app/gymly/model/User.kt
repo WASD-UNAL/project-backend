@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import java.math.BigDecimal
 import java.time.OffsetDateTime
 
 @Entity
@@ -27,6 +28,10 @@ class User(
     var passwordHash: String,
     @Column(unique = true, nullable = false)
     var document: String,
+    @Column(name = "weight", precision = 5, scale = 2)
+    var weight: BigDecimal? = null,
+    @Column(name = "height", precision = 5, scale = 2)
+    var height: BigDecimal? = null,
     @Column(name = "created_at", insertable = false, updatable = false)
     var createdAt: OffsetDateTime? = null,
     @Column(nullable = false)

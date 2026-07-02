@@ -87,6 +87,12 @@ ktlint {
     verbose.set(true)
     outputToConsole.set(true)
     coloredOutput.set(true)
+    additionalEditorconfig.set(
+        mapOf(
+            "ktlint_standard_no-wildcard-imports" to "disabled",
+        ),
+    )
+
     reporters {
         reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.HTML)
         reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)

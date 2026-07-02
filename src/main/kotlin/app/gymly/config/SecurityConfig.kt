@@ -36,6 +36,8 @@ class SecurityConfig(
                 auth
                     .requestMatchers("/auth/**")
                     .permitAll()
+                    .requestMatchers("/error")
+                    .permitAll()
                     .requestMatchers("/actuator/health", "/actuator/info")
                     .permitAll()
                     .requestMatchers("/admin/**")
