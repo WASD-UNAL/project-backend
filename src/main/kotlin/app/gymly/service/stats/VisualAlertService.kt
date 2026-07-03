@@ -27,6 +27,25 @@ class VisualAlertService(
         return evaluateMembershipStatus(document, user, latestMembership)
     }
 
+    fun checkAccessColorByUserId(userId: Int): VisualAlertResponse {
+        val user =
+            userRepository.findById(userId).orElse(null)
+                ?: return VisualAlertResponse("", null, "RED", 0, "Usuario no registrado en el sistema.")
+
+        val latestMembership =
+            getLatestMembership(userId)
+                ?: return VisualAlertResponse(
+                    user.document,
+                    user.fullName(),
+                    "RED",
+                    0,
+                    "El usuario no cuenta con ninguna membresía.",
+                    user.id,
+                )
+
+        return evaluateMembershipStatus(user.document, user, latestMembership)
+    }
+
     fun getCustomersByAlertStatus(targetStatus: String): List<VisualAlertResponse> {
         val allUsers = userRepository.findAll().toList()
         return allUsers

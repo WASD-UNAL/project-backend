@@ -22,6 +22,18 @@ class GlobalExceptionHandler {
     fun handleDuplicate(e: RuntimeException): ResponseEntity<Map<String, Any?>> =
         ResponseEntity.status(HttpStatus.CONFLICT).body(error("conflict", e.message))
 
+    @ExceptionHandler(PlanNotFoundException::class)
+    fun handleNotFound(e: RuntimeException): ResponseEntity<Map<String, Any?>> =
+        ResponseEntity.status(HttpStatus.NOT_FOUND).body(error("not_found", e.message))
+
+    @ExceptionHandler(
+        PlanInactiveException::class,
+        MembershipAlreadyActiveException::class,
+        NoActiveMembershipException::class,
+    )
+    fun handleMembershipConflict(e: RuntimeException): ResponseEntity<Map<String, Any?>> =
+        ResponseEntity.status(HttpStatus.CONFLICT).body(error("conflict", e.message))
+
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidation(e: MethodArgumentNotValidException): ResponseEntity<Map<String, Any?>> {
         val fields = e.bindingResult.fieldErrors.associate { it.field to (it.defaultMessage ?: "invalid") }

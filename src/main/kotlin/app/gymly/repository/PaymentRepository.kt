@@ -13,6 +13,7 @@ import java.time.OffsetDateTime
 interface PaymentRepository : JpaRepository<Payment, Int> {
     fun findByIdOrNull(id: Int): Payment? = findById(id).orElse(null)
 
+    fun findByUserIdOrderByCreatedAtDesc(userId: Int): List<Payment>
     fun countByCreatedAtBetweenAndStatus(
         start: OffsetDateTime,
         end: OffsetDateTime,
