@@ -25,11 +25,6 @@ class MembershipEnrollmentService(
     private val paymentRepository: PaymentRepository,
     private val membershipViewService: MembershipViewService,
 ) {
-    /**
-     * Inscribe al usuario en un plan: crea la membresía ACTIVE (vigente por la
-     * duración del plan) y registra el pago como PENDING. Rechaza si el plan no
-     * existe/está inactivo o si el usuario ya tiene una membresía activa vigente.
-     */
     @Transactional
     fun enroll(
         userId: Int,
@@ -67,10 +62,6 @@ class MembershipEnrollmentService(
         return membershipViewService.getMyMembership(userId)
     }
 
-    /**
-     * Cancela la membresía activa del usuario pasándola a EXPIRED. Rechaza si no
-     * hay una membresía en estado ACTIVE.
-     */
     @Transactional
     fun cancel(userId: Int): MyMembershipResponse {
         val current =

@@ -13,10 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-/**
- * Endpoints self-service del cliente autenticado (bajo la ruta "/me") para la
- * sección de Pagos. El usuario se resuelve desde el JWT, no por documento.
- */
 @RestController
 @RequestMapping("/me")
 class MembershipViewController(

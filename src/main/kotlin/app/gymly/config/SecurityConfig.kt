@@ -54,12 +54,6 @@ class SecurityConfig(
         return http.build()
     }
 
-    /**
-     * Permite llamadas desde el frontend en desarrollo (Vite en distintos
-     * puertos localhost, p.ej. 5173/5177). El backend no usa cookies de
-     * sesión (JWT vía header Authorization), así que no se requieren
-     * credenciales de CORS.
-     */
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration =

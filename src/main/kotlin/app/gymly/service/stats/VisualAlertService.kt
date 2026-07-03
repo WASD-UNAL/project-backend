@@ -27,11 +27,6 @@ class VisualAlertService(
         return evaluateMembershipStatus(document, user, latestMembership)
     }
 
-    /**
-     * Misma evaluación de semáforo que [checkAccessColor], pero identificando
-     * al usuario por su id (para endpoints self-service bajo la ruta "/me") en
-     * vez de por documento. Reusa [getLatestMembership] y [evaluateMembershipStatus].
-     */
     fun checkAccessColorByUserId(userId: Int): VisualAlertResponse {
         val user =
             userRepository.findById(userId).orElse(null)
