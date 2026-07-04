@@ -11,7 +11,8 @@ class PlanViewService(
 ) {
     fun getActivePlans(): List<PlanResponse> = planRepository.findByActiveTrue().map { toResponseDTO(it) }
 
-    fun getPlanById(id: Int): PlanResponse? = planRepository.findById(id).map { toResponseDTO(it) }.orElse(null)
+    fun getPlanById(id: Int): PlanResponse? =
+        planRepository.findById(id).filter { it.active }.map { toResponseDTO(it) }.orElse(null)
 
     private fun toResponseDTO(plan: Plan): PlanResponse =
         PlanResponse(
