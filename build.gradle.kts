@@ -65,22 +65,25 @@ allOpen {
     annotation("jakarta.persistence.Embeddable")
 }
 
-tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+fun readDotEnv(): Map<String, String> {
     val envFile = file(".env")
-    if (envFile.exists()) {
-        envFile.readLines().forEach { line ->
-            if (line.isNotBlank() && !line.startsWith("#")) {
-                val parts = line.split("=", limit = 2)
-                if (parts.size == 2) {
-                    environment(parts[0].trim(), parts[1].trim())
-                }
-            }
-        }
-    }
+    if (!envFile.exists()) return emptyMap()
+    return envFile
+        .readLines()
+        .mapNotNull { line ->
+            if (line.isBlank() || line.startsWith("#")) return@mapNotNull null
+            val parts = line.split("=", limit = 2)
+            if (parts.size == 2) parts[0].trim() to parts[1].trim() else null
+        }.toMap()
+}
+
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+    readDotEnv().forEach { (key, value) -> environment(key, value) }
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    readDotEnv().forEach { (key, value) -> environment(key, value) }
 }
 
 ktlint {
