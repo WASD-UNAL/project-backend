@@ -16,8 +16,9 @@ class StreakService(
     fun getLastAttendances(
         userId: Int,
         limit: Int,
-    ): List<AttendanceItem> {
-        return attendanceRepository.findByUserIdOrderByDateDesc(userId, PageRequest.of(0, limit))
+    ): List<AttendanceItem> =
+        attendanceRepository
+            .findByUserIdOrderByDateDesc(userId, PageRequest.of(0, limit))
             .mapNotNull { attendance ->
                 attendance.date?.let { offsetDateTime ->
                     AttendanceItem(
@@ -26,12 +27,14 @@ class StreakService(
                     )
                 }
             }
-    }
+
     fun calculateStreak(userId: Int): StreakInfo {
-        val dates = attendanceRepository.findByUserId(userId)
-            .mapNotNull { it.date?.toLocalDate() }
-            .distinct()
-            .sorted()
+        val dates =
+            attendanceRepository
+                .findByUserId(userId)
+                .mapNotNull { it.date?.toLocalDate() }
+                .distinct()
+                .sorted()
 
         if (dates.isEmpty()) {
             return StreakInfo(

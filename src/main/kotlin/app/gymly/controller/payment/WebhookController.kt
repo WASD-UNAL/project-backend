@@ -11,12 +11,11 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/payments/webhook")
 class WebhookController(
-    private val webhookService: WebhookService
+    private val webhookService: WebhookService,
 ) {
-
     @PostMapping
     fun handleMercadoPagoNotification(
-        @RequestBody webhookRequest: WebhookRequest
+        @RequestBody webhookRequest: WebhookRequest,
     ): ResponseEntity<Unit> {
         webhookService.processNotification(webhookRequest)
         return ResponseEntity.ok().build()

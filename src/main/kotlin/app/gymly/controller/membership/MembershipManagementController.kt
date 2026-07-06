@@ -12,16 +12,15 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/memberships")
 class MembershipManagementController(
-    private val membershipManagementService: MembershipManagementService
+    private val membershipManagementService: MembershipManagementService,
 ) {
-
     @GetMapping("/{id}")
-    fun getById(@PathVariable id: Int): ResponseEntity<MembershipResponse> {
-        return ResponseEntity.ok(membershipManagementService.getMembershipById(id))
-    }
+    fun getById(
+        @PathVariable id: Int,
+    ): ResponseEntity<MembershipResponse> = ResponseEntity.ok(membershipManagementService.getMembershipById(id))
 
     @GetMapping
-    fun getByUserId(@RequestParam userId: Int): ResponseEntity<List<MembershipResponse>> {
-        return ResponseEntity.ok(membershipManagementService.getMembershipsByUserId(userId))
-    }
+    fun getByUserId(
+        @RequestParam userId: Int,
+    ): ResponseEntity<List<MembershipResponse>> = ResponseEntity.ok(membershipManagementService.getMembershipsByUserId(userId))
 }

@@ -9,5 +9,5 @@ data class MembershipResponse(
     val planId: Int,
     val initDate: LocalDate?,
     val endDate: LocalDate?,
-    val status: MembershipStatus
+    val status: MembershipStatus,
 )

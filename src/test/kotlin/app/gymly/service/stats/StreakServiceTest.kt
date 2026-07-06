@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.ZoneId
 
 class StreakServiceTest {

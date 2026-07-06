@@ -13,28 +13,28 @@ import java.time.LocalDate
 @Service
 class MembershipManagementService(
     private val membershipRepository: MembershipRepository,
-    private val planRepository: PlanRepository
+    private val planRepository: PlanRepository,
 ) {
-
     @Transactional(readOnly = true)
     fun getMembershipById(id: Int): MembershipResponse {
-        val membership = membershipRepository.findByIdOrNull(id)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Membresía con ID $id no encontrada")
+        val membership =
+            membershipRepository.findByIdOrNull(id)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Membresía con ID $id no encontrada")
         return toResponse(membership)
     }
 
     @Transactional(readOnly = true)
-    fun getMembershipsByUserId(userId: Int): List<MembershipResponse> {
-        return membershipRepository.findByUserId(userId).map { toResponse(it) }
-    }
+    fun getMembershipsByUserId(userId: Int): List<MembershipResponse> = membershipRepository.findByUserId(userId).map { toResponse(it) }
 
     @Transactional
     fun activateMembership(membershipId: Int) {
-        val membership = membershipRepository.findByIdOrNull(membershipId)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Membresía con ID $membershipId no encontrada")
+        val membership =
+            membershipRepository.findByIdOrNull(membershipId)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Membresía con ID $membershipId no encontrada")
 
-        val plan = planRepository.findByIdOrNull(membership.planId)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Plan con ID ${membership.planId} no encontrado")
+        val plan =
+            planRepository.findByIdOrNull(membership.planId)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Plan con ID ${membership.planId} no encontrado")
 
         val now = LocalDate.now()
         val durationDays = plan.durationDays.toLong()
@@ -53,6 +53,6 @@ class MembershipManagementService(
             planId = membership.planId,
             initDate = membership.initDate,
             endDate = membership.endDate,
-            status = membership.status
+            status = membership.status,
         )
 }

@@ -4,7 +4,6 @@ import app.gymly.dto.payment.CheckoutResponse
 import app.gymly.dto.payment.PaymentRequest
 import app.gymly.dto.payment.PaymentResponse
 import app.gymly.dto.payment.UpdatePaymentRequest
-import app.gymly.model.MembershipStatus
 import app.gymly.model.Payment
 import app.gymly.model.PaymentMethod
 import app.gymly.model.PaymentStatus

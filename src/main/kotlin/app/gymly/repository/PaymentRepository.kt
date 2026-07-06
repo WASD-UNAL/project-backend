@@ -14,6 +14,7 @@ interface PaymentRepository : JpaRepository<Payment, Int> {
     fun findByIdOrNull(id: Int): Payment? = findById(id).orElse(null)
 
     fun findByUserIdOrderByCreatedAtDesc(userId: Int): List<Payment>
+
     fun countByCreatedAtBetweenAndStatus(
         start: OffsetDateTime,
         end: OffsetDateTime,
@@ -27,7 +28,8 @@ interface PaymentRepository : JpaRepository<Payment, Int> {
         @Param("status") status: PaymentStatus,
     ): BigDecimal
 
-    @Query("""
+    @Query(
+        """
         SELECT pl.id, pl.name, COALESCE(SUM(p.amount), 0), COUNT(p.id)
         FROM Payment p, Membership m, Plan pl
         WHERE p.membershipId = m.id
@@ -36,7 +38,8 @@ interface PaymentRepository : JpaRepository<Payment, Int> {
           AND p.status = :status
         GROUP BY pl.id, pl.name
         ORDER BY COALESCE(SUM(p.amount), 0) DESC
-    """)
+    """,
+    )
     fun sumAmountGroupedByPlanInPeriod(
         @Param("start") start: OffsetDateTime,
         @Param("end") end: OffsetDateTime,
