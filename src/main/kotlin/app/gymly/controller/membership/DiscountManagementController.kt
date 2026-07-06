@@ -1,5 +1,6 @@
 package app.gymly.controller.membership
 
+import app.gymly.constants.AppConstants
 import app.gymly.dto.membership.DiscountRequest
 import app.gymly.dto.membership.DiscountResponse
 import app.gymly.dto.membership.UpdateDiscountRequest
@@ -7,6 +8,7 @@ import app.gymly.service.membership.DiscountManagementService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/membership/discounts")
+@PreAuthorize("hasRole('${AppConstants.ROLE_ADMIN_UPPER}')")
 class DiscountManagementController(
     private val discountManagementService: DiscountManagementService,
 ) {
