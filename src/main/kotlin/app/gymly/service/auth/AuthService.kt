@@ -8,6 +8,8 @@ import app.gymly.dto.auth.LogoutResponse
 import app.gymly.dto.auth.RefreshTokenRequest
 import app.gymly.dto.auth.RegisterRequest
 import app.gymly.dto.auth.UserResponse
+import app.gymly.exception.DocumentAlreadyExistsException
+import app.gymly.exception.EmailAlreadyExistsException
 import app.gymly.exception.InvalidCredentialsException
 import app.gymly.exception.RoleNotConfiguredException
 import app.gymly.model.RefreshToken
@@ -99,6 +101,10 @@ class AuthService(
         document: String,
         rawPassword: String,
     ): User {
+        val trimmedDocument = document.trim()
+        if (userRepository.findByEmail(email) != null) throw EmailAlreadyExistsException(email)
+        if (userRepository.findByDocument(trimmedDocument) != null) throw DocumentAlreadyExistsException(trimmedDocument)
+
         val user =
             User(
                 roleId = role.id ?: throw RoleNotConfiguredException(role.name),
@@ -106,7 +112,7 @@ class AuthService(
                 lastname = lastName,
                 email = email,
                 passwordHash = passwordEncoder.encode(rawPassword) ?: throw RuntimeException("Password encoding failed"),
-                document = document.trim(),
+                document = trimmedDocument,
             )
         return userRepository.save(user)
     }

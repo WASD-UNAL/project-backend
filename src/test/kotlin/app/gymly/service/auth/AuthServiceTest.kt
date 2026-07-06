@@ -4,6 +4,8 @@ import app.gymly.constants.AppConstants
 import app.gymly.dto.auth.LoginRequest
 import app.gymly.dto.auth.RefreshTokenRequest
 import app.gymly.dto.auth.RegisterRequest
+import app.gymly.exception.DocumentAlreadyExistsException
+import app.gymly.exception.EmailAlreadyExistsException
 import app.gymly.exception.InvalidCredentialsException
 import app.gymly.exception.RoleNotConfiguredException
 import app.gymly.model.RefreshToken
@@ -151,6 +153,61 @@ class AuthServiceTest {
         }
 
         verify(passwordEncoder, never()).encode(anyString())
+        verify(userRepository, never()).save(any(User::class.java))
+    }
+
+    /**
+     * **Funcionalidad Esencial:** Unicidad de documento (RF_23).
+     * **Caso Límite:** Se intenta registrar un cliente con un documento que ya existe.
+     * El servicio debe abortar con `DocumentAlreadyExistsException` sin persistir,
+     * en vez de dejar reventar el constraint de la base de datos.
+     * **Aislamiento:** Se mockea `userRepository.findByDocument` devolviendo un usuario existente.
+     */
+    @Test
+    fun `registerClient should throw DocumentAlreadyExistsException when document already exists`() {
+        val request =
+            RegisterRequest(
+                name = "Bob",
+                lastname = "Dup",
+                email = "bob@test.com",
+                document = "12345678",
+                password = "password123",
+            )
+
+        `when`(roleRepository.findByName(AppConstants.ROLE_CLIENT)).thenReturn(testRole)
+        `when`(userRepository.findByDocument("12345678")).thenReturn(testUser)
+
+        assertThrows<DocumentAlreadyExistsException> {
+            authService.registerClient(request)
+        }
+
+        verify(userRepository, never()).save(any(User::class.java))
+    }
+
+    /**
+     * **Funcionalidad Esencial:** Unicidad de correo.
+     * **Caso Límite:** Se intenta registrar un cliente con un correo que ya existe.
+     * El servicio debe abortar con `EmailAlreadyExistsException` sin persistir.
+     * **Aislamiento:** Se mockea `userRepository.findByEmail` devolviendo un usuario existente.
+     */
+    @Test
+    fun `registerClient should throw EmailAlreadyExistsException when email already exists`() {
+        val request =
+            RegisterRequest(
+                name = "Bob",
+                lastname = "Dup",
+                email = "test@user.com",
+                document = "99887766",
+                password = "password123",
+            )
+
+        `when`(roleRepository.findByName(AppConstants.ROLE_CLIENT)).thenReturn(testRole)
+        `when`(userRepository.findByEmail("test@user.com")).thenReturn(testUser)
+
+        assertThrows<EmailAlreadyExistsException> {
+            authService.registerClient(request)
+        }
+
         verify(userRepository, never()).save(any(User::class.java))
     }
 }

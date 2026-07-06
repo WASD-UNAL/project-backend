@@ -1,5 +1,6 @@
 package app.gymly.exception
 
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
@@ -21,6 +22,12 @@ class GlobalExceptionHandler {
     @ExceptionHandler(EmailAlreadyExistsException::class, DocumentAlreadyExistsException::class)
     fun handleDuplicate(e: RuntimeException): ResponseEntity<Map<String, Any?>> =
         ResponseEntity.status(HttpStatus.CONFLICT).body(error("conflict", e.message))
+
+    @ExceptionHandler(DataIntegrityViolationException::class)
+    fun handleDataIntegrity(e: DataIntegrityViolationException): ResponseEntity<Map<String, Any?>> =
+        ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body(error("conflict", "El registro infringe una restricción de unicidad (posible duplicado)."))
 
     @ExceptionHandler(PlanNotFoundException::class)
     fun handleNotFound(e: RuntimeException): ResponseEntity<Map<String, Any?>> =
