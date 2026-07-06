@@ -27,6 +27,7 @@ class MembershipViewService(
 
         return MyMembershipResponse(
             hasActiveMembership = isActive,
+            membershipId = if (isActive) membership?.id else null,
             planId = plan?.id,
             planName = plan?.name,
             price = plan?.price,
