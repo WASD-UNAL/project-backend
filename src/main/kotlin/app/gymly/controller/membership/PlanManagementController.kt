@@ -1,5 +1,6 @@
 package app.gymly.controller.membership
 
+import app.gymly.constants.AppConstants
 import app.gymly.dto.membership.PlanRequest
 import app.gymly.dto.membership.PlanResponse
 import app.gymly.dto.membership.UpdatePlanRequest
@@ -7,6 +8,7 @@ import app.gymly.service.membership.PlanManagementService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/membership/plans")
+@PreAuthorize("hasRole('${AppConstants.ROLE_ADMIN_UPPER}')")
 class PlanManagementController(
     private val planManagementService: PlanManagementService,
 ) {

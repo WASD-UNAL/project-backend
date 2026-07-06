@@ -6,11 +6,11 @@ class InvalidCredentialsException(
 
 class EmailAlreadyExistsException(
     email: String,
-) : RuntimeException("Email '$email' is already registered")
+) : RuntimeException("El correo '$email' ya está registrado.")
 
 class DocumentAlreadyExistsException(
     document: String,
-) : RuntimeException("Document '$document' is already registered")
+) : RuntimeException("El documento '$document' ya está registrado.")
 
 class RoleNotConfiguredException(
     roleName: String,
