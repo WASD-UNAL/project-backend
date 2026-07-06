@@ -129,3 +129,15 @@ END IF;
 ALTER TABLE notification_queue ADD CONSTRAINT fk_notification_queue_user FOREIGN KEY (user_id) REFERENCES users (id);
 END IF;
 END $$;
+
+ALTER TABLE users ALTER COLUMN created_at SET DEFAULT now();
+ALTER TABLE attendances ALTER COLUMN date SET DEFAULT now();
+ALTER TABLE memberships ALTER COLUMN created_at SET DEFAULT now();
+ALTER TABLE payments ALTER COLUMN created_at SET DEFAULT now();
+ALTER TABLE refresh_tokens ALTER COLUMN created_at SET DEFAULT now();
+ALTER TABLE notification_queue ALTER COLUMN created_at SET DEFAULT now();
+
+UPDATE users SET created_at = now() WHERE created_at IS NULL;
+UPDATE memberships SET created_at = now() WHERE created_at IS NULL;
+UPDATE payments SET created_at = now() WHERE created_at IS NULL;
+UPDATE attendances SET date = now() WHERE date IS NULL;
