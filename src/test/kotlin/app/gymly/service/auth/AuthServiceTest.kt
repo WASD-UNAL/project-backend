@@ -67,11 +67,7 @@ class AuthServiceTest {
             )
     }
 
-    /**
-     * **Funcionalidad Esencial:** Autenticación de usuarios (Login).
-     * **Caso Límite:** Intento de inicio de sesión de un usuario que existe en el sistema, pero su cuenta fue desactivada (active = false). Debe denegar el acceso sin llegar a comprobar descifrados de contraseña.
-     * **Aislamiento de Base de Datos:** Se mockea `userRepository` para evitar la lectura real a la BD, validando únicamente la lógica de negocio del servicio.
-     */
+
     @Test
     fun `login should throw InvalidCredentialsException when user is not active`() {
         val request = LoginRequest(identifier = "test@user.com", password = "password123")
@@ -99,11 +95,7 @@ class AuthServiceTest {
         verify(passwordEncoder, never()).matches(anyString(), anyString())
     }
 
-    /**
-     * **Funcionalidad Esencial:** Renovación de sesión (Refresh Token).
-     * **Caso Límite:** El cliente envía un Refresh Token cuyo tiempo de vida (`expiresAt`) ya ha pasado. La lógica debe capturar esto y abortar el refresh, forzando un re-login.
-     * **Aislamiento de Base de Datos:** Se emplea un mock en `refreshTokenRepository` simulando lo que devolvería la consulta, impidiendo cualquier lectura a la base real.
-     */
+
     @Test
     fun `refreshAccessToken should throw InvalidCredentialsException when token is expired`() {
         val expiredTokenStr = "expired-refresh-token"
@@ -128,13 +120,7 @@ class AuthServiceTest {
         verify(userRepository, never()).findById(anyInt())
     }
 
-    /**
-     * **Funcionalidad Esencial:** Rol no existente.
-     * **Caso Límite (Out of Bounds):** Se intenta registrar un cliente pero el rol CLIENT
-     * no existe en la base de datos (no fue seedeado). El servicio debe abortar con
-     * `RoleNotConfiguredException` sin tocar encriptación ni persistencia.
-     * **Aislamiento:** Se mockea `roleRepository.findByName` devolviendo null.
-     */
+
     @Test
     fun `registerClient should throw RoleNotConfiguredException when role is not found`() {
         val request =
@@ -156,13 +142,7 @@ class AuthServiceTest {
         verify(userRepository, never()).save(any(User::class.java))
     }
 
-    /**
-     * **Funcionalidad Esencial:** Unicidad de documento (RF_23).
-     * **Caso Límite:** Se intenta registrar un cliente con un documento que ya existe.
-     * El servicio debe abortar con `DocumentAlreadyExistsException` sin persistir,
-     * en vez de dejar reventar el constraint de la base de datos.
-     * **Aislamiento:** Se mockea `userRepository.findByDocument` devolviendo un usuario existente.
-     */
+
     @Test
     fun `registerClient should throw DocumentAlreadyExistsException when document already exists`() {
         val request =
@@ -184,12 +164,7 @@ class AuthServiceTest {
         verify(userRepository, never()).save(any(User::class.java))
     }
 
-    /**
-     * **Funcionalidad Esencial:** Unicidad de correo.
-     * **Caso Límite:** Se intenta registrar un cliente con un correo que ya existe.
-     * El servicio debe abortar con `EmailAlreadyExistsException` sin persistir.
-     * **Aislamiento:** Se mockea `userRepository.findByEmail` devolviendo un usuario existente.
-     */
+
     @Test
     fun `registerClient should throw EmailAlreadyExistsException when email already exists`() {
         val request =
