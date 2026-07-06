@@ -50,6 +50,8 @@ class SecurityConfig(
                     .permitAll()
                     .requestMatchers("/admin/**")
                     .hasRole(AppConstants.ROLE_ADMIN_UPPER)
+                    .requestMatchers("/stats/attendance")
+                    .permitAll()
                     .anyRequest()
                     .authenticated()
             }.oauth2ResourceServer { rs ->
