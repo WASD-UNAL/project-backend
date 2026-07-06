@@ -1,5 +1,6 @@
 package app.gymly.controller.presentation
 
+import app.gymly.controller.currentRole
 import app.gymly.controller.currentUserId
 import app.gymly.dto.auth.UserResponse
 import app.gymly.dto.membership.MyMembershipResponse
@@ -21,10 +22,10 @@ class MembershipViewController(
     private val userProfileService: UserProfileService,
 ) {
     @GetMapping("/profile")
-    fun getMyProfile(authentication: Authentication): ResponseEntity<UserResponse> {
-        val roleName = (authentication.authorities.first().authority ?: "").removePrefix("ROLE_")
-        return ResponseEntity.ok(userProfileService.getMyProfile(authentication.currentUserId(), roleName))
-    }
+    fun getMyProfile(authentication: Authentication): ResponseEntity<UserResponse> =
+        ResponseEntity.ok(
+            userProfileService.getMyProfile(authentication.currentUserId(), authentication.currentRole()),
+        )
 
     @GetMapping("/membership")
     fun getMyMembership(authentication: Authentication): ResponseEntity<MyMembershipResponse> =
