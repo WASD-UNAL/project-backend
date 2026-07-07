@@ -15,6 +15,8 @@ interface PaymentRepository : JpaRepository<Payment, Int> {
 
     fun findByUserIdOrderByCreatedAtDesc(userId: Int): List<Payment>
 
+    fun findByMembershipId(membershipId: Int): List<Payment>
+
     fun countByCreatedAtBetweenAndStatus(
         start: OffsetDateTime,
         end: OffsetDateTime,

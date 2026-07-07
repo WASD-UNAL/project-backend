@@ -55,6 +55,8 @@ class WebhookService(
                     localPayment.status = PaymentStatus.REJECTED
                     localPayment.reference = "MP-$mpPaymentId"
                     paymentRepository.save(localPayment)
+
+                    membershipManagementService.deactivateMembership(localPayment.membershipId)
                 }
             }
         } catch (e: MPApiException) {
