@@ -56,7 +56,7 @@ class MembershipEnrollmentService(
                 ),
             )
 
-        if (request.paymentMethod == PaymentMethod.CASH) {
+        if (request.paymentMethod == PaymentMethod.CASH || request.paymentMethod == PaymentMethod.TRANSFER) {
             paymentRepository.save(
                 Payment(
                     membershipId = membership.id!!,
