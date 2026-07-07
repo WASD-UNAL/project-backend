@@ -9,4 +9,5 @@ data class PlanResponse(
     val durationDays: Int,
     val price: BigDecimal,
     val active: Boolean,
+    val discount: PlanDiscountResponse? = null,
 )

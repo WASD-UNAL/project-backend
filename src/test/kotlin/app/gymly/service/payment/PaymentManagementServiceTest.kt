@@ -1,6 +1,7 @@
 package app.gymly.service.payment
 
 import app.gymly.dto.payment.PaymentRequest
+import app.gymly.model.Discount
 import app.gymly.model.Membership
 import app.gymly.model.MembershipStatus
 import app.gymly.model.Payment
@@ -10,6 +11,7 @@ import app.gymly.model.Plan
 import app.gymly.repository.MembershipRepository
 import app.gymly.repository.PaymentRepository
 import app.gymly.repository.PlanRepository
+import app.gymly.service.membership.DiscountPricingService
 import app.gymly.service.membership.MembershipManagementService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -30,6 +32,7 @@ class PaymentManagementServiceTest {
     private lateinit var membershipRepository: MembershipRepository
     private lateinit var planRepository: PlanRepository
     private lateinit var mercadoPagoService: MercadoPagoService
+    private lateinit var discountPricingService: DiscountPricingService
     private lateinit var service: PaymentManagementService
 
     private val plan =
@@ -66,6 +69,7 @@ class PaymentManagementServiceTest {
         membershipRepository = mock()
         planRepository = mock()
         mercadoPagoService = mock()
+        discountPricingService = mock()
         service =
             PaymentManagementService(
                 paymentRepository,
@@ -73,6 +77,7 @@ class PaymentManagementServiceTest {
                 membershipRepository,
                 planRepository,
                 mercadoPagoService,
+                discountPricingService,
             )
 
         whenever(membershipRepository.findByIdOrNull(5)).thenReturn(membership)
@@ -115,6 +120,35 @@ class PaymentManagementServiceTest {
 
             assertEquals(77, response.paymentId)
             assertEquals("Inscripción plan Plan Premium", pending.reference)
+        }
+
+        @Test
+        fun checkoutAppliesCurrentDiscountToAmount() {
+            val discount =
+                Discount(
+                    id = 3,
+                    name = "Verano Fit",
+                    percentage = BigDecimal("20.00"),
+                    initDate = LocalDate.now().minusDays(1),
+                    endDate = LocalDate.now().plusDays(10),
+                )
+            whenever(discountPricingService.currentDiscountFor(10)).thenReturn(discount)
+            whenever(discountPricingService.discountedPrice(BigDecimal("90000.00"), discount))
+                .thenReturn(BigDecimal("72000.00"))
+            whenever(paymentRepository.findByMembershipId(5)).thenReturn(emptyList())
+            whenever(paymentRepository.save(any<Payment>())).thenAnswer { it.arguments[0] }
+
+            service.createCheckout(checkoutRequest())
+
+            val captor = argumentCaptor<Payment>()
+            verify(paymentRepository).save(captor.capture())
+            assertEquals(BigDecimal("72000.00"), captor.firstValue.amount)
+            assertEquals(3, captor.firstValue.discountId)
+            verify(mercadoPagoService).createPaymentLink(
+                eq("You are paying: Plan Premium"),
+                eq(BigDecimal("72000.00")),
+                any(),
+            )
         }
 
         @Test
