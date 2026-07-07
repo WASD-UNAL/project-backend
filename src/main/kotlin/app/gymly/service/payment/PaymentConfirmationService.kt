@@ -1,0 +1,110 @@
+package app.gymly.service.payment
+
+import app.gymly.model.Payment
+import app.gymly.model.PaymentMethod
+import app.gymly.model.PaymentStatus
+import app.gymly.repository.PaymentRepository
+import app.gymly.service.membership.MembershipManagementService
+import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.server.ResponseStatusException
+import java.time.OffsetDateTime
+
+@Service
+class PaymentConfirmationService(
+    private val paymentRepository: PaymentRepository,
+    private val membershipManagementService: MembershipManagementService,
+    private val mercadoPagoService: MercadoPagoService,
+) {
+    @Transactional
+    fun applyMercadoPagoResult(
+        mpPaymentId: Long,
+        requesterUserId: Int? = null,
+    ): Payment {
+        val mpPayment = mercadoPagoService.getPayment(mpPaymentId)
+        val localPayment = resolveLocalPayment(mpPayment.externalReference, requesterUserId)
+
+        if (localPayment.status != PaymentStatus.PENDING) {
+            return localPayment
+        }
+
+        if (mpPayment.status == "approved") {
+            approve(localPayment, mpPaymentId)
+        }
+
+        return localPayment
+    }
+
+    @Transactional
+    fun reconcilePendingCardPayment(paymentId: Int) {
+        val payment = paymentRepository.findByIdOrNull(paymentId) ?: return
+        if (payment.method != PaymentMethod.CARD || payment.status != PaymentStatus.PENDING) {
+            return
+        }
+
+        val attempts = mercadoPagoService.searchPaymentsByExternalReference(paymentId.toString())
+
+        val approved = attempts.firstOrNull { it.status == "approved" }
+        if (approved != null) {
+            approve(payment, approved.id)
+            return
+        }
+
+        val createdAt = payment.createdAt ?: return
+        if (createdAt.isBefore(OffsetDateTime.now().minusMinutes(RETRY_GRACE_MINUTES))) {
+            reject(payment, attempts.firstOrNull()?.id)
+        }
+    }
+
+    private fun approve(
+        payment: Payment,
+        mpPaymentId: Long?,
+    ) {
+        payment.status = PaymentStatus.SUCCESSFUL
+        if (payment.reference.isNullOrBlank() && mpPaymentId != null) {
+            payment.reference = "MP-$mpPaymentId"
+        }
+        paymentRepository.save(payment)
+        membershipManagementService.activateMembership(payment.membershipId)
+    }
+
+    private fun reject(
+        payment: Payment,
+        mpPaymentId: Long?,
+    ) {
+        payment.status = PaymentStatus.REJECTED
+        if (payment.reference.isNullOrBlank() && mpPaymentId != null) {
+            payment.reference = "MP-$mpPaymentId"
+        }
+        paymentRepository.save(payment)
+        membershipManagementService.deactivateMembership(payment.membershipId)
+    }
+
+    private fun resolveLocalPayment(
+        externalReference: String?,
+        requesterUserId: Int?,
+    ): Payment {
+        if (externalReference.isNullOrBlank()) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "El pago de Mercado Pago no contiene external_reference")
+        }
+
+        val localPaymentId =
+            externalReference.toIntOrNull()
+                ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "El external_reference del pago no es válido")
+
+        val localPayment =
+            paymentRepository.findByIdOrNull(localPaymentId)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Pago local con ID $localPaymentId no encontrado")
+
+        if (requesterUserId != null && localPayment.userId != requesterUserId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "El pago no pertenece al usuario autenticado")
+        }
+
+        return localPayment
+    }
+
+    private companion object {
+        const val RETRY_GRACE_MINUTES = 3L
+    }
+}

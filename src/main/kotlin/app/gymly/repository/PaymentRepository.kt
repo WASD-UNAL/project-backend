@@ -1,6 +1,7 @@
 package app.gymly.repository
 
 import app.gymly.model.Payment
+import app.gymly.model.PaymentMethod
 import app.gymly.model.PaymentStatus
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -16,6 +17,11 @@ interface PaymentRepository : JpaRepository<Payment, Int> {
     fun findByUserIdOrderByCreatedAtDesc(userId: Int): List<Payment>
 
     fun findByMembershipId(membershipId: Int): List<Payment>
+
+    fun findByMethodAndStatus(
+        method: PaymentMethod,
+        status: PaymentStatus,
+    ): List<Payment>
 
     fun countByCreatedAtBetweenAndStatus(
         start: OffsetDateTime,

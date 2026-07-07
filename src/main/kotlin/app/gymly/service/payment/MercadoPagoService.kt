@@ -1,11 +1,14 @@
 package app.gymly.service.payment
 
+import com.mercadopago.client.payment.PaymentClient
 import com.mercadopago.client.preference.PreferenceBackUrlsRequest
 import com.mercadopago.client.preference.PreferenceClient
 import com.mercadopago.client.preference.PreferenceItemRequest
 import com.mercadopago.client.preference.PreferenceRequest
 import com.mercadopago.exceptions.MPApiException
 import com.mercadopago.exceptions.MPException
+import com.mercadopago.net.MPSearchRequest
+import com.mercadopago.resources.payment.Payment as MercadoPagoPayment
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -16,6 +19,47 @@ import java.math.BigDecimal
 class MercadoPagoService(
     @Value("\${app.frontend-url}") private val frontendUrl: String,
 ) {
+    fun getPayment(mpPaymentId: Long): MercadoPagoPayment {
+        try {
+            return PaymentClient().get(mpPaymentId)
+        } catch (e: MPApiException) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Error al consultar el pago en Mercado Pago: ${e.apiResponse.content}",
+                e,
+            )
+        } catch (e: MPException) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Error interno de Mercado Pago SDK",
+                e,
+            )
+        }
+    }
+
+    fun searchPaymentsByExternalReference(externalReference: String): List<MercadoPagoPayment> {
+        try {
+            val request =
+                MPSearchRequest
+                    .builder()
+                    .filters(mapOf("external_reference" to externalReference))
+                    .build()
+            return PaymentClient().search(request).results ?: emptyList()
+        } catch (e: MPApiException) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Error al buscar pagos en Mercado Pago: ${e.apiResponse.content}",
+                e,
+            )
+        } catch (e: MPException) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Error interno de Mercado Pago SDK",
+                e,
+            )
+        }
+    }
+
     fun createPaymentLink(
         title: String,
         price: BigDecimal,
