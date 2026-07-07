@@ -56,6 +56,7 @@ class PaymentManagementService(
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Plan con ID ${membership.planId} no encontrado")
 
         val conceptName = "You are paying: ${plan.name}"
+        val planReference = "Inscripción plan ${plan.name}"
 
         val paymentEntity =
             paymentRepository
@@ -64,8 +65,12 @@ class PaymentManagementService(
                 ?.apply {
                     amount = paymentRequest.amount!!
                     method = paymentRequest.method
+                    reference = planReference
                 }
-                ?: toEntity(paymentRequest).apply { status = PaymentStatus.PENDING }
+                ?: toEntity(paymentRequest).apply {
+                    status = PaymentStatus.PENDING
+                    reference = planReference
+                }
 
         val savedPayment = paymentRepository.save(paymentEntity)
 
