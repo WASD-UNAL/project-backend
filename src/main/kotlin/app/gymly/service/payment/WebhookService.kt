@@ -15,9 +15,8 @@ import org.springframework.web.server.ResponseStatusException
 @Service
 class WebhookService(
     private val paymentRepository: PaymentRepository,
-    private val membershipManagementService: MembershipManagementService
+    private val membershipManagementService: MembershipManagementService,
 ) {
-
     @Transactional
     fun processNotification(webhookRequest: WebhookRequest) {
         if (webhookRequest.type != "payment" || webhookRequest.data?.id == null) {
@@ -36,8 +35,9 @@ class WebhookService(
 
             val localPaymentId = localPaymentIdStr.toInt()
 
-            val localPayment = paymentRepository.findByIdOrNull(localPaymentId)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Pago local con ID $localPaymentId no encontrado")
+            val localPayment =
+                paymentRepository.findByIdOrNull(localPaymentId)
+                    ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Pago local con ID $localPaymentId no encontrado")
 
             if (localPayment.status == PaymentStatus.SUCCESSFUL) {
                 return
@@ -57,7 +57,6 @@ class WebhookService(
                     paymentRepository.save(localPayment)
                 }
             }
-
         } catch (e: MPApiException) {
             throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al consultar en MP: ${e.apiResponse.content}", e)
         } catch (e: MPException) {

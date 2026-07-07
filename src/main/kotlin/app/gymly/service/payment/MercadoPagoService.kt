@@ -1,17 +1,21 @@
 package app.gymly.service.payment
 
+import com.mercadopago.client.preference.PreferenceBackUrlsRequest
 import com.mercadopago.client.preference.PreferenceClient
 import com.mercadopago.client.preference.PreferenceItemRequest
 import com.mercadopago.client.preference.PreferenceRequest
 import com.mercadopago.exceptions.MPApiException
 import com.mercadopago.exceptions.MPException
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import java.math.BigDecimal
 
 @Service
-class MercadoPagoService {
+class MercadoPagoService(
+    @Value("\${app.frontend-url}") private val frontendUrl: String,
+) {
     fun createPaymentLink(
         title: String,
         price: BigDecimal,
@@ -29,11 +33,20 @@ class MercadoPagoService {
                     .currencyId("COP")
                     .build()
 
+            val backUrls =
+                PreferenceBackUrlsRequest
+                    .builder()
+                    .success("$frontendUrl/dashboard?payment=success")
+                    .pending("$frontendUrl/dashboard?payment=pending")
+                    .failure("$frontendUrl/dashboard?payment=failure")
+                    .build()
+
             val request =
                 PreferenceRequest
                     .builder()
                     .items(listOf(item))
                     .externalReference(externalReference)
+                    .backUrls(backUrls)
                     .build()
 
             val preference = client.create(request)

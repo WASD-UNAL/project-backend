@@ -15,8 +15,9 @@ class ClientDashboardController(
 ) {
     @GetMapping("/dashboard")
     fun getDashboard(authentication: Authentication): ResponseEntity<ClientDashboardResponse> {
-        val userId = authentication.name.toIntOrNull()
-            ?: throw IllegalArgumentException("Token inválido: no se pudo obtener el ID de usuario")
+        val userId =
+            authentication.name.toIntOrNull()
+                ?: throw IllegalArgumentException("Token inválido: no se pudo obtener el ID de usuario")
         return ResponseEntity.ok(clientDashboardService.getDashboard(userId))
     }
 }

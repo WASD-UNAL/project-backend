@@ -1,5 +1,6 @@
 package app.gymly.service.stats
 
+import app.gymly.constants.AppConstants
 import app.gymly.dto.client.AttendanceItem
 import app.gymly.dto.client.StreakInfo
 import app.gymly.dto.client.StreakPeriod
@@ -16,22 +17,26 @@ class StreakService(
     fun getLastAttendances(
         userId: Int,
         limit: Int,
-    ): List<AttendanceItem> {
-        return attendanceRepository.findByUserIdOrderByDateDesc(userId, PageRequest.of(0, limit))
+    ): List<AttendanceItem> =
+        attendanceRepository
+            .findByUserIdOrderByDateDesc(userId, PageRequest.of(0, limit))
             .mapNotNull { attendance ->
                 attendance.date?.let { offsetDateTime ->
+                    val local = offsetDateTime.atZoneSameInstant(AppConstants.APP_ZONE_ID)
                     AttendanceItem(
-                        date = offsetDateTime.toLocalDate(),
-                        time = offsetDateTime.toLocalTime().toString().take(5),
+                        date = local.toLocalDate(),
+                        time = local.toLocalTime().toString().take(5),
                     )
                 }
             }
-    }
+
     fun calculateStreak(userId: Int): StreakInfo {
-        val dates = attendanceRepository.findByUserId(userId)
-            .mapNotNull { it.date?.toLocalDate() }
-            .distinct()
-            .sorted()
+        val dates =
+            attendanceRepository
+                .findByUserId(userId)
+                .mapNotNull { it.date?.atZoneSameInstant(AppConstants.APP_ZONE_ID)?.toLocalDate() }
+                .distinct()
+                .sorted()
 
         if (dates.isEmpty()) {
             return StreakInfo(

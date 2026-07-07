@@ -3,6 +3,7 @@ package app.gymly.model
 enum class MembershipStatus(
     val dbValue: String,
 ) {
+    PENDING("pending"),
     ACTIVE("active"),
     EXPIRED("expired"),
     FROZEN("frozen"),

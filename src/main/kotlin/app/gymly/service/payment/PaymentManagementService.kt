@@ -4,7 +4,6 @@ import app.gymly.dto.payment.CheckoutResponse
 import app.gymly.dto.payment.PaymentRequest
 import app.gymly.dto.payment.PaymentResponse
 import app.gymly.dto.payment.UpdatePaymentRequest
-import app.gymly.model.MembershipStatus
 import app.gymly.model.Payment
 import app.gymly.model.PaymentMethod
 import app.gymly.model.PaymentStatus
@@ -82,12 +81,23 @@ class PaymentManagementService(
             paymentRepository.findByIdOrNull(id)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Pago con ID $id no encontrado")
 
+        val previousStatus = existingPayment.status
+
         updatePaymentRequest.amount?.let { existingPayment.amount = it }
         updatePaymentRequest.method?.let { existingPayment.method = it }
         updatePaymentRequest.reference?.let { existingPayment.reference = it }
         updatePaymentRequest.status?.let { existingPayment.status = it }
 
         val savedPayment = paymentRepository.save(existingPayment)
+
+        if (savedPayment.status != previousStatus) {
+            when (savedPayment.status) {
+                PaymentStatus.SUCCESSFUL -> membershipManagementService.activateMembership(savedPayment.membershipId)
+                PaymentStatus.REJECTED -> membershipManagementService.deactivateMembership(savedPayment.membershipId)
+                PaymentStatus.PENDING -> {}
+            }
+        }
+
         return toResponse(savedPayment)
     }
 

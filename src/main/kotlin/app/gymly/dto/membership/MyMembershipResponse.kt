@@ -5,6 +5,8 @@ import java.time.LocalDate
 
 data class MyMembershipResponse(
     val hasActiveMembership: Boolean,
+    val pendingApproval: Boolean,
+    val membershipId: Int?,
     val planId: Int?,
     val planName: String?,
     val price: BigDecimal?,

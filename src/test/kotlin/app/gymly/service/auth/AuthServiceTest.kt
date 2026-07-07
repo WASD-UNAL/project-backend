@@ -67,7 +67,6 @@ class AuthServiceTest {
             )
     }
 
-
     @Test
     fun `login should throw InvalidCredentialsException when user is not active`() {
         val request = LoginRequest(identifier = "test@user.com", password = "password123")
@@ -95,7 +94,6 @@ class AuthServiceTest {
         verify(passwordEncoder, never()).matches(anyString(), anyString())
     }
 
-
     @Test
     fun `refreshAccessToken should throw InvalidCredentialsException when token is expired`() {
         val expiredTokenStr = "expired-refresh-token"
@@ -120,7 +118,6 @@ class AuthServiceTest {
         verify(userRepository, never()).findById(anyInt())
     }
 
-
     @Test
     fun `registerClient should throw RoleNotConfiguredException when role is not found`() {
         val request =
@@ -142,7 +139,6 @@ class AuthServiceTest {
         verify(userRepository, never()).save(any(User::class.java))
     }
 
-
     @Test
     fun `registerClient should throw DocumentAlreadyExistsException when document already exists`() {
         val request =
@@ -163,7 +159,6 @@ class AuthServiceTest {
 
         verify(userRepository, never()).save(any(User::class.java))
     }
-
 
     @Test
     fun `registerClient should throw EmailAlreadyExistsException when email already exists`() {

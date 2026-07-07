@@ -10,4 +10,6 @@ class PlanInactiveException(
 
 class MembershipAlreadyActiveException : RuntimeException("User already has an active membership")
 
+class MembershipPendingApprovalException : RuntimeException("User already has a membership pending payment approval")
+
 class NoActiveMembershipException : RuntimeException("User has no active membership")

@@ -16,17 +16,21 @@ class MembershipViewService(
 ) {
     fun getMyMembership(userId: Int): MyMembershipResponse {
         val alert = visualAlertService.checkAccessColorByUserId(userId)
-        val membership = membershipRepository.findFirstByUserIdOrderByEndDateDesc(userId)
+        val membership = membershipRepository.findFirstByUserIdOrderByIdDesc(userId)
 
         val isActive =
             membership != null &&
                 membership.status == MembershipStatus.ACTIVE &&
                 !membership.endDate.isBefore(LocalDate.now())
 
-        val plan = if (isActive) membership?.let { planRepository.findByIdOrNull(it.planId) } else null
+        val isPending = membership != null && membership.status == MembershipStatus.PENDING
+
+        val plan = if (isActive || isPending) membership?.let { planRepository.findByIdOrNull(it.planId) } else null
 
         return MyMembershipResponse(
             hasActiveMembership = isActive,
+            pendingApproval = isPending,
+            membershipId = if (isActive || isPending) membership?.id else null,
             planId = plan?.id,
             planName = plan?.name,
             price = plan?.price,

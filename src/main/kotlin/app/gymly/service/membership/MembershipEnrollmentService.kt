@@ -3,6 +3,7 @@ package app.gymly.service.membership
 import app.gymly.dto.membership.EnrollRequest
 import app.gymly.dto.membership.MyMembershipResponse
 import app.gymly.exception.MembershipAlreadyActiveException
+import app.gymly.exception.MembershipPendingApprovalException
 import app.gymly.exception.NoActiveMembershipException
 import app.gymly.exception.PlanInactiveException
 import app.gymly.exception.PlanNotFoundException
@@ -34,7 +35,13 @@ class MembershipEnrollmentService(
         val plan = planRepository.findByIdOrNull(planId) ?: throw PlanNotFoundException(planId)
         if (!plan.active) throw PlanInactiveException(planId)
 
-        if (hasActiveMembership(userId)) throw MembershipAlreadyActiveException()
+        val latest = membershipRepository.findFirstByUserIdOrderByIdDesc(userId)
+        if (latest != null) {
+            if (latest.status == MembershipStatus.PENDING) throw MembershipPendingApprovalException()
+            if (latest.status == MembershipStatus.ACTIVE && !latest.endDate.isBefore(LocalDate.now())) {
+                throw MembershipAlreadyActiveException()
+            }
+        }
 
         val today = LocalDate.now()
         val membership =
@@ -44,7 +51,7 @@ class MembershipEnrollmentService(
                     planId = planId,
                     initDate = today,
                     endDate = today.plusDays(plan.durationDays.toLong()),
-                    status = MembershipStatus.ACTIVE,
+                    status = MembershipStatus.PENDING,
                 ),
             )
 
@@ -65,7 +72,7 @@ class MembershipEnrollmentService(
     @Transactional
     fun cancel(userId: Int): MyMembershipResponse {
         val current =
-            membershipRepository.findFirstByUserIdOrderByEndDateDesc(userId)
+            membershipRepository.findFirstByUserIdOrderByIdDesc(userId)
                 ?: throw NoActiveMembershipException()
 
         if (current.status != MembershipStatus.ACTIVE) throw NoActiveMembershipException()
@@ -74,10 +81,5 @@ class MembershipEnrollmentService(
         membershipRepository.save(current)
 
         return membershipViewService.getMyMembership(userId)
-    }
-
-    private fun hasActiveMembership(userId: Int): Boolean {
-        val current = membershipRepository.findFirstByUserIdOrderByEndDateDesc(userId) ?: return false
-        return current.status == MembershipStatus.ACTIVE && !current.endDate.isBefore(LocalDate.now())
     }
 }

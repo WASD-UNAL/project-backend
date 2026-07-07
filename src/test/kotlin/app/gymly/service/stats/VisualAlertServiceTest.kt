@@ -70,7 +70,7 @@ class VisualAlertServiceTest {
             Assertions.assertNull(result.userName)
             Assertions.assertEquals(0L, result.daysRemaining)
             Assertions.assertEquals("Usuario no registrado en el sistema.", result.message)
-            verify(membershipRepository, never()).findFirstByUserIdOrderByEndDateDesc(any())
+            verify(membershipRepository, never()).findFirstByUserIdOrderByIdDesc(any())
         }
     }
 
@@ -80,7 +80,7 @@ class VisualAlertServiceTest {
         fun returnsRedWhenUserHasNoMembership() {
             val user = buildUser()
             whenever(userRepository.findByDocument(user.document)).thenReturn(user)
-            whenever(membershipRepository.findFirstByUserIdOrderByEndDateDesc(user.id!!)).thenReturn(null)
+            whenever(membershipRepository.findFirstByUserIdOrderByIdDesc(user.id!!)).thenReturn(null)
 
             val result = service.checkAccessColor(user.document)
 
@@ -98,7 +98,7 @@ class VisualAlertServiceTest {
             val user = buildUser()
             val membership = buildMembership(endDate = LocalDate.now())
             whenever(userRepository.findByDocument(user.document)).thenReturn(user)
-            whenever(membershipRepository.findFirstByUserIdOrderByEndDateDesc(user.id!!)).thenReturn(membership)
+            whenever(membershipRepository.findFirstByUserIdOrderByIdDesc(user.id!!)).thenReturn(membership)
 
             val result = service.checkAccessColor(user.document)
 
@@ -112,7 +112,7 @@ class VisualAlertServiceTest {
             val yesterday = LocalDate.now().minusDays(1)
             val membership = buildMembership(endDate = yesterday)
             whenever(userRepository.findByDocument(user.document)).thenReturn(user)
-            whenever(membershipRepository.findFirstByUserIdOrderByEndDateDesc(user.id!!)).thenReturn(membership)
+            whenever(membershipRepository.findFirstByUserIdOrderByIdDesc(user.id!!)).thenReturn(membership)
 
             val result = service.checkAccessColor(user.document)
 
@@ -130,7 +130,7 @@ class VisualAlertServiceTest {
                     status = MembershipStatus.FROZEN,
                 )
             whenever(userRepository.findByDocument(user.document)).thenReturn(user)
-            whenever(membershipRepository.findFirstByUserIdOrderByEndDateDesc(user.id!!)).thenReturn(membership)
+            whenever(membershipRepository.findFirstByUserIdOrderByIdDesc(user.id!!)).thenReturn(membership)
 
             val result = service.checkAccessColor(user.document)
 
