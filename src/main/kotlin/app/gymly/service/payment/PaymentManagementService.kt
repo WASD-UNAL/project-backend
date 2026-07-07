@@ -58,9 +58,14 @@ class PaymentManagementService(
         val conceptName = "You are paying: ${plan.name}"
 
         val paymentEntity =
-            toEntity(paymentRequest).apply {
-                status = PaymentStatus.PENDING
-            }
+            paymentRepository
+                .findByMembershipId(membership.id!!)
+                .firstOrNull { it.status == PaymentStatus.PENDING }
+                ?.apply {
+                    amount = paymentRequest.amount!!
+                    method = paymentRequest.method
+                }
+                ?: toEntity(paymentRequest).apply { status = PaymentStatus.PENDING }
 
         val savedPayment = paymentRepository.save(paymentEntity)
 

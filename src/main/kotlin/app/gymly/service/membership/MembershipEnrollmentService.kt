@@ -10,6 +10,7 @@ import app.gymly.exception.PlanNotFoundException
 import app.gymly.model.Membership
 import app.gymly.model.MembershipStatus
 import app.gymly.model.Payment
+import app.gymly.model.PaymentMethod
 import app.gymly.model.PaymentStatus
 import app.gymly.repository.MembershipRepository
 import app.gymly.repository.PaymentRepository
@@ -55,16 +56,18 @@ class MembershipEnrollmentService(
                 ),
             )
 
-        paymentRepository.save(
-            Payment(
-                membershipId = membership.id!!,
-                userId = userId,
-                amount = plan.price,
-                method = request.paymentMethod!!,
-                status = PaymentStatus.PENDING,
-                reference = "Inscripción plan ${plan.name}",
-            ),
-        )
+        if (request.paymentMethod == PaymentMethod.CASH || request.paymentMethod == PaymentMethod.TRANSFER) {
+            paymentRepository.save(
+                Payment(
+                    membershipId = membership.id!!,
+                    userId = userId,
+                    amount = plan.price,
+                    method = request.paymentMethod,
+                    status = PaymentStatus.PENDING,
+                    reference = "Inscripción plan ${plan.name}",
+                ),
+            )
+        }
 
         return membershipViewService.getMyMembership(userId)
     }
@@ -75,10 +78,20 @@ class MembershipEnrollmentService(
             membershipRepository.findFirstByUserIdOrderByIdDesc(userId)
                 ?: throw NoActiveMembershipException()
 
-        if (current.status != MembershipStatus.ACTIVE) throw NoActiveMembershipException()
+        if (current.status != MembershipStatus.ACTIVE && current.status != MembershipStatus.PENDING) {
+            throw NoActiveMembershipException()
+        }
 
         current.status = MembershipStatus.EXPIRED
         membershipRepository.save(current)
+
+        paymentRepository
+            .findByMembershipId(current.id!!)
+            .filter { it.status == PaymentStatus.PENDING }
+            .forEach {
+                it.status = PaymentStatus.REJECTED
+                paymentRepository.save(it)
+            }
 
         return membershipViewService.getMyMembership(userId)
     }

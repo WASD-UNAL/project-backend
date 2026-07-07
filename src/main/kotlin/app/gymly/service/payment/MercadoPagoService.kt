@@ -47,6 +47,7 @@ class MercadoPagoService(
                     .items(listOf(item))
                     .externalReference(externalReference)
                     .backUrls(backUrls)
+                    .autoReturn("all")
                     .build()
 
             val preference = client.create(request)
