@@ -46,6 +46,16 @@ class MembershipManagementService(
         membershipRepository.save(membership)
     }
 
+    @Transactional
+    fun deactivateMembership(membershipId: Int) {
+        val membership =
+            membershipRepository.findByIdOrNull(membershipId)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Membresía con ID $membershipId no encontrada")
+
+        membership.status = MembershipStatus.EXPIRED
+        membershipRepository.save(membership)
+    }
+
     private fun toResponse(membership: Membership): MembershipResponse =
         MembershipResponse(
             id = membership.id ?: 0,

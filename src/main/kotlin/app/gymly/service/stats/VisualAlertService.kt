@@ -59,7 +59,7 @@ class VisualAlertService(
             }.filter { it.statusColor == targetStatus }
     }
 
-    private fun getLatestMembership(userId: Int): Membership? = membershipRepository.findFirstByUserIdOrderByEndDateDesc(userId)
+    private fun getLatestMembership(userId: Int): Membership? = membershipRepository.findFirstByUserIdOrderByIdDesc(userId)
 
     private fun evaluateMembershipStatus(
         document: String,

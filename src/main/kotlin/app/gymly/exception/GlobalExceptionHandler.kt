@@ -36,6 +36,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(
         PlanInactiveException::class,
         MembershipAlreadyActiveException::class,
+        MembershipPendingApprovalException::class,
         NoActiveMembershipException::class,
     )
     fun handleMembershipConflict(e: RuntimeException): ResponseEntity<Map<String, Any?>> =

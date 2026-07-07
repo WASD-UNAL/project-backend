@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface MembershipRepository : JpaRepository<Membership, Int> {
-    fun findFirstByUserIdOrderByEndDateDesc(userId: Int): Membership?
+    fun findFirstByUserIdOrderByIdDesc(userId: Int): Membership?
 
     fun findByUserId(userId: Int): List<Membership>
 
