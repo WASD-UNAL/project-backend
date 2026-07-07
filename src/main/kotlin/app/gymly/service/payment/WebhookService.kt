@@ -46,14 +46,18 @@ class WebhookService(
             when (mpPayment.status) {
                 "approved" -> {
                     localPayment.status = PaymentStatus.SUCCESSFUL
-                    localPayment.reference = "MP-$mpPaymentId"
+                    if (localPayment.reference.isNullOrBlank()) {
+                        localPayment.reference = "MP-$mpPaymentId"
+                    }
                     paymentRepository.save(localPayment)
 
                     membershipManagementService.activateMembership(localPayment.membershipId)
                 }
                 "rejected", "cancelled" -> {
                     localPayment.status = PaymentStatus.REJECTED
-                    localPayment.reference = "MP-$mpPaymentId"
+                    if (localPayment.reference.isNullOrBlank()) {
+                        localPayment.reference = "MP-$mpPaymentId"
+                    }
                     paymentRepository.save(localPayment)
 
                     membershipManagementService.deactivateMembership(localPayment.membershipId)
