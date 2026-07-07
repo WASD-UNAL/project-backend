@@ -41,14 +41,18 @@ class MercadoPagoService(
                     .failure("$frontendUrl/dashboard?payment=failure")
                     .build()
 
-            val request =
+            val builder =
                 PreferenceRequest
                     .builder()
                     .items(listOf(item))
                     .externalReference(externalReference)
                     .backUrls(backUrls)
-                    .autoReturn("all")
-                    .build()
+
+            if (!frontendUrl.contains("localhost") && !frontendUrl.contains("127.0.0.1")) {
+                builder.autoReturn("all")
+            }
+
+            val request = builder.build()
 
             val preference = client.create(request)
             return preference.initPoint
