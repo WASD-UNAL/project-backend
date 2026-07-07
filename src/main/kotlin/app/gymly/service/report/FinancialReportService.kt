@@ -1,5 +1,6 @@
 package app.gymly.service.report
 
+import app.gymly.constants.AppConstants
 import app.gymly.dto.report.MonthlyRevenueResponse
 import app.gymly.dto.report.PeriodSummary
 import app.gymly.dto.report.PlanRevenue
@@ -13,7 +14,6 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.Month
 import java.time.OffsetDateTime
-import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
 
 @Service
@@ -105,7 +105,7 @@ class FinancialReportService(
         year: Int,
         month: Int,
     ): Pair<OffsetDateTime, OffsetDateTime> {
-        val start = OffsetDateTime.of(year, month, 1, 0, 0, 0, 0, ZoneId.systemDefault().rules.getOffset(java.time.Instant.now()))
+        val start = OffsetDateTime.of(year, month, 1, 0, 0, 0, 0, AppConstants.APP_ZONE_ID.rules.getOffset(java.time.Instant.now()))
         val end = start.with(TemporalAdjusters.lastDayOfMonth()).with(java.time.LocalTime.MAX)
         return Pair(start, end)
     }

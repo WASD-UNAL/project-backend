@@ -1,5 +1,6 @@
 package app.gymly.service.stats
 
+import app.gymly.constants.AppConstants
 import app.gymly.dto.stats.AttendanceStatsResponse
 import app.gymly.dto.stats.StatPoint
 import app.gymly.model.StatPeriod
@@ -9,7 +10,6 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.Month
-import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
 
 @Service
@@ -46,14 +46,14 @@ class AttendanceStatsService(
     }
 
     private fun calculateHoursDay(date: LocalDate): List<StatPoint> {
-        val startOfDay = date.atStartOfDay().atZone(ZoneId.systemDefault()).toOffsetDateTime()
-        val endOfDay = date.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toOffsetDateTime()
+        val startOfDay = date.atStartOfDay().atZone(AppConstants.APP_ZONE_ID).toOffsetDateTime()
+        val endOfDay = date.atTime(LocalTime.MAX).atZone(AppConstants.APP_ZONE_ID).toOffsetDateTime()
         val attendances = attendanceRepository.findByDateBetween(startOfDay, endOfDay)
 
         val groupedByHour =
             attendances
                 .filter { it.date != null }
-                .groupBy { it.date!!.toLocalDateTime().hour }
+                .groupBy { it.date!!.atZoneSameInstant(AppConstants.APP_ZONE_ID).hour }
 
         val startHour = 6
         val endHour = 23
@@ -74,21 +74,21 @@ class AttendanceStatsService(
                 .with(
                     TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY),
                 ).atStartOfDay()
-                .atZone(ZoneId.systemDefault())
+                .atZone(AppConstants.APP_ZONE_ID)
                 .toOffsetDateTime()
         val endOfWeek =
             startOfWeek
                 .toLocalDate()
                 .plusDays(6)
                 .atTime(LocalTime.MAX)
-                .atZone(ZoneId.systemDefault())
+                .atZone(AppConstants.APP_ZONE_ID)
                 .toOffsetDateTime()
         val attendances = attendanceRepository.findByDateBetween(startOfWeek, endOfWeek)
 
         val groupedByDay =
             attendances
                 .filter { it.date != null }
-                .groupBy { it.date!!.toLocalDateTime().dayOfWeek }
+                .groupBy { it.date!!.atZoneSameInstant(AppConstants.APP_ZONE_ID).dayOfWeek }
 
         return DayOfWeek.entries.map { dayOfWeek ->
             val count = groupedByDay[dayOfWeek]?.size?.toLong() ?: 0L
@@ -104,21 +104,21 @@ class AttendanceStatsService(
             date
                 .with(TemporalAdjusters.firstDayOfMonth())
                 .atStartOfDay()
-                .atZone(ZoneId.systemDefault())
+                .atZone(AppConstants.APP_ZONE_ID)
                 .toOffsetDateTime()
         val endOfMonth =
             date
                 .with(
                     TemporalAdjusters.lastDayOfMonth(),
                 ).atTime(LocalTime.MAX)
-                .atZone(ZoneId.systemDefault())
+                .atZone(AppConstants.APP_ZONE_ID)
                 .toOffsetDateTime()
         val attendances = attendanceRepository.findByDateBetween(startOfMonth, endOfMonth)
 
         val groupedByDayOfMonth =
             attendances
                 .filter { it.date != null }
-                .groupBy { it.date!!.toLocalDateTime().dayOfMonth }
+                .groupBy { it.date!!.atZoneSameInstant(AppConstants.APP_ZONE_ID).dayOfMonth }
 
         val daysInMonth = date.lengthOfMonth()
 
@@ -136,20 +136,20 @@ class AttendanceStatsService(
             date
                 .with(TemporalAdjusters.firstDayOfYear())
                 .atStartOfDay()
-                .atZone(ZoneId.systemDefault())
+                .atZone(AppConstants.APP_ZONE_ID)
                 .toOffsetDateTime()
         val endOfYear =
             date
                 .with(TemporalAdjusters.lastDayOfYear())
                 .atTime(LocalTime.MAX)
-                .atZone(ZoneId.systemDefault())
+                .atZone(AppConstants.APP_ZONE_ID)
                 .toOffsetDateTime()
         val attendances = attendanceRepository.findByDateBetween(startOfYear, endOfYear)
 
         val groupedByMonth =
             attendances
                 .filter { it.date != null }
-                .groupBy { it.date!!.toLocalDateTime().month }
+                .groupBy { it.date!!.atZoneSameInstant(AppConstants.APP_ZONE_ID).month }
 
         return Month.entries.map { month ->
             val count = groupedByMonth[month]?.size?.toLong() ?: 0L
