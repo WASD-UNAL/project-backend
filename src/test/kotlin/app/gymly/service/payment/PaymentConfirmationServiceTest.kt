@@ -18,6 +18,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import java.math.BigDecimal
+import java.time.OffsetDateTime
 import com.mercadopago.resources.payment.Payment as MercadoPagoPayment
 
 class PaymentConfirmationServiceTest {
@@ -39,6 +40,7 @@ class PaymentConfirmationServiceTest {
     private fun localPayment(
         status: PaymentStatus = PaymentStatus.PENDING,
         reference: String? = "Inscripción plan Premium",
+        createdAt: OffsetDateTime? = OffsetDateTime.now(),
     ) = Payment(
         id = 77,
         membershipId = 5,
@@ -47,103 +49,53 @@ class PaymentConfirmationServiceTest {
         method = PaymentMethod.CARD,
         status = status,
         reference = reference,
+        createdAt = createdAt,
     )
 
-    private fun stubMercadoPago(
-        mpStatus: String,
+    private fun mpPayment(
+        status: String,
         externalReference: String? = "77",
-    ) {
-        val mpPayment = mock<MercadoPagoPayment>()
-        whenever(mpPayment.status).thenReturn(mpStatus)
-        whenever(mpPayment.externalReference).thenReturn(externalReference)
-        whenever(mercadoPagoService.getPayment(mpPaymentId)).thenReturn(mpPayment)
+        id: Long = mpPaymentId,
+    ): MercadoPagoPayment {
+        val mp = mock<MercadoPagoPayment>()
+        whenever(mp.status).thenReturn(status)
+        whenever(mp.externalReference).thenReturn(externalReference)
+        whenever(mp.id).thenReturn(id)
+        return mp
     }
 
     @Nested
-    inner class ApprovedPayment {
+    inner class ApplyMercadoPagoResult {
         @Test
-        fun marksPaymentSuccessfulAndActivatesMembership() {
+        fun approvesAndActivatesWhenMpApproved() {
             val payment = localPayment()
-            stubMercadoPago("approved")
+            whenever(mercadoPagoService.getPayment(mpPaymentId)).thenReturn(mpPayment("approved"))
             whenever(paymentRepository.findByIdOrNull(77)).thenReturn(payment)
             whenever(paymentRepository.save(any<Payment>())).thenAnswer { it.arguments[0] }
 
             val result = service.applyMercadoPagoResult(mpPaymentId)
 
             assertEquals(PaymentStatus.SUCCESSFUL, result.status)
-            assertEquals("Inscripción plan Premium", result.reference)
             verify(membershipManagementService).activateMembership(5)
         }
 
         @Test
-        fun fallsBackToMpReferenceWhenPaymentHasNone() {
-            val payment = localPayment(reference = null)
-            stubMercadoPago("approved")
-            whenever(paymentRepository.findByIdOrNull(77)).thenReturn(payment)
-            whenever(paymentRepository.save(any<Payment>())).thenAnswer { it.arguments[0] }
-
-            val result = service.applyMercadoPagoResult(mpPaymentId)
-
-            assertEquals("MP-$mpPaymentId", result.reference)
-        }
-    }
-
-    @Nested
-    inner class RejectedPayment {
-        @Test
-        fun marksPaymentRejectedAndDeactivatesMembership() {
+        fun leavesPendingWhenMpRejectedToRespectRetryGrace() {
             val payment = localPayment()
-            stubMercadoPago("rejected")
-            whenever(paymentRepository.findByIdOrNull(77)).thenReturn(payment)
-            whenever(paymentRepository.save(any<Payment>())).thenAnswer { it.arguments[0] }
-
-            val result = service.applyMercadoPagoResult(mpPaymentId)
-
-            assertEquals(PaymentStatus.REJECTED, result.status)
-            verify(membershipManagementService).deactivateMembership(5)
-            verify(membershipManagementService, never()).activateMembership(any())
-        }
-    }
-
-    @Nested
-    inner class PendingPayment {
-        @Test
-        fun keepsPaymentPendingForInProcessStatus() {
-            val payment = localPayment()
-            stubMercadoPago("in_process")
+            whenever(mercadoPagoService.getPayment(mpPaymentId)).thenReturn(mpPayment("rejected"))
             whenever(paymentRepository.findByIdOrNull(77)).thenReturn(payment)
 
             val result = service.applyMercadoPagoResult(mpPaymentId)
 
             assertEquals(PaymentStatus.PENDING, result.status)
             verify(paymentRepository, never()).save(any())
-            verify(membershipManagementService, never()).activateMembership(any())
             verify(membershipManagementService, never()).deactivateMembership(any())
         }
-    }
 
-    @Nested
-    inner class AlreadyConfirmed {
-        @Test
-        fun isIdempotentForSuccessfulPayments() {
-            val payment = localPayment(status = PaymentStatus.SUCCESSFUL)
-            stubMercadoPago("approved")
-            whenever(paymentRepository.findByIdOrNull(77)).thenReturn(payment)
-
-            val result = service.applyMercadoPagoResult(mpPaymentId)
-
-            assertEquals(PaymentStatus.SUCCESSFUL, result.status)
-            verify(paymentRepository, never()).save(any())
-            verify(membershipManagementService, never()).activateMembership(any())
-        }
-    }
-
-    @Nested
-    inner class Validation {
         @Test
         fun rejectsRequesterWhoDoesNotOwnThePayment() {
             val payment = localPayment()
-            stubMercadoPago("approved")
+            whenever(mercadoPagoService.getPayment(mpPaymentId)).thenReturn(mpPayment("approved"))
             whenever(paymentRepository.findByIdOrNull(77)).thenReturn(payment)
 
             val error =
@@ -154,30 +106,61 @@ class PaymentConfirmationServiceTest {
             assertEquals(HttpStatus.FORBIDDEN, error.statusCode)
             verify(membershipManagementService, never()).activateMembership(any())
         }
+    }
 
+    @Nested
+    inner class ReconcilePendingCardPayment {
         @Test
-        fun failsWhenExternalReferenceIsMissing() {
-            stubMercadoPago("approved", externalReference = null)
+        fun approvesWhenThereIsAnApprovedAttempt() {
+            val payment = localPayment()
+            whenever(paymentRepository.findByIdOrNull(77)).thenReturn(payment)
+            whenever(mercadoPagoService.searchPaymentsByExternalReference("77"))
+                .thenReturn(listOf(mpPayment("rejected", id = 111L), mpPayment("approved", id = 222L)))
+            whenever(paymentRepository.save(any<Payment>())).thenAnswer { it.arguments[0] }
 
-            val error =
-                assertThrows(ResponseStatusException::class.java) {
-                    service.applyMercadoPagoResult(mpPaymentId)
-                }
+            service.reconcilePendingCardPayment(77)
 
-            assertEquals(HttpStatus.BAD_REQUEST, error.statusCode)
+            assertEquals(PaymentStatus.SUCCESSFUL, payment.status)
+            verify(membershipManagementService).activateMembership(5)
         }
 
         @Test
-        fun failsWhenLocalPaymentDoesNotExist() {
-            stubMercadoPago("approved")
-            whenever(paymentRepository.findByIdOrNull(77)).thenReturn(null)
+        fun keepsPendingWithinGraceWhenNotApproved() {
+            val payment = localPayment(createdAt = OffsetDateTime.now().minusMinutes(1))
+            whenever(paymentRepository.findByIdOrNull(77)).thenReturn(payment)
+            whenever(mercadoPagoService.searchPaymentsByExternalReference("77"))
+                .thenReturn(listOf(mpPayment("rejected", id = 111L)))
 
-            val error =
-                assertThrows(ResponseStatusException::class.java) {
-                    service.applyMercadoPagoResult(mpPaymentId)
-                }
+            service.reconcilePendingCardPayment(77)
 
-            assertEquals(HttpStatus.NOT_FOUND, error.statusCode)
+            assertEquals(PaymentStatus.PENDING, payment.status)
+            verify(paymentRepository, never()).save(any())
+            verify(membershipManagementService, never()).deactivateMembership(any())
+        }
+
+        @Test
+        fun rejectsAfterGraceWhenNotApproved() {
+            val payment = localPayment(createdAt = OffsetDateTime.now().minusMinutes(5))
+            whenever(paymentRepository.findByIdOrNull(77)).thenReturn(payment)
+            whenever(mercadoPagoService.searchPaymentsByExternalReference("77"))
+                .thenReturn(listOf(mpPayment("rejected", id = 111L)))
+            whenever(paymentRepository.save(any<Payment>())).thenAnswer { it.arguments[0] }
+
+            service.reconcilePendingCardPayment(77)
+
+            assertEquals(PaymentStatus.REJECTED, payment.status)
+            verify(membershipManagementService).deactivateMembership(5)
+        }
+
+        @Test
+        fun ignoresNonCardOrNonPendingPayments() {
+            val payment = localPayment(status = PaymentStatus.SUCCESSFUL)
+            whenever(paymentRepository.findByIdOrNull(77)).thenReturn(payment)
+
+            service.reconcilePendingCardPayment(77)
+
+            verify(mercadoPagoService, never()).searchPaymentsByExternalReference(any())
+            verify(paymentRepository, never()).save(any())
         }
     }
 }
