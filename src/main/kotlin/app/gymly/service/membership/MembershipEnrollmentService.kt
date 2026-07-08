@@ -73,6 +73,46 @@ class MembershipEnrollmentService(
     }
 
     @Transactional
+    fun changePaymentMethod(
+        userId: Int,
+        method: PaymentMethod,
+    ): MyMembershipResponse {
+        val current =
+            membershipRepository.findFirstByUserIdOrderByIdDesc(userId)
+                ?: throw NoActiveMembershipException()
+
+        if (current.status != MembershipStatus.PENDING) {
+            throw NoActiveMembershipException()
+        }
+
+        val plan = planRepository.findByIdOrNull(current.planId) ?: throw PlanNotFoundException(current.planId)
+
+        val pendingPayment =
+            paymentRepository
+                .findByMembershipId(current.id!!)
+                .firstOrNull { it.status == PaymentStatus.PENDING }
+
+        if (pendingPayment != null) {
+            pendingPayment.method = method
+            pendingPayment.amount = plan.price
+            paymentRepository.save(pendingPayment)
+        } else {
+            paymentRepository.save(
+                Payment(
+                    membershipId = current.id!!,
+                    userId = userId,
+                    amount = plan.price,
+                    method = method,
+                    status = PaymentStatus.PENDING,
+                    reference = "Inscripción plan ${plan.name}",
+                ),
+            )
+        }
+
+        return membershipViewService.getMyMembership(userId)
+    }
+
+    @Transactional
     fun cancel(userId: Int): MyMembershipResponse {
         val current =
             membershipRepository.findFirstByUserIdOrderByIdDesc(userId)

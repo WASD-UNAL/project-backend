@@ -8,17 +8,20 @@ import com.mercadopago.client.preference.PreferenceRequest
 import com.mercadopago.exceptions.MPApiException
 import com.mercadopago.exceptions.MPException
 import com.mercadopago.net.MPSearchRequest
-import com.mercadopago.resources.payment.Payment as MercadoPagoPayment
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import java.math.BigDecimal
+import com.mercadopago.resources.payment.Payment as MercadoPagoPayment
 
 @Service
 class MercadoPagoService(
     @Value("\${app.frontend-url}") private val frontendUrl: String,
+    @Value("\${app.backend-url}") private val backendUrl: String,
 ) {
+    private fun isPublicUrl(url: String): Boolean = !url.contains("localhost") && !url.contains("127.0.0.1")
+
     fun getPayment(mpPaymentId: Long): MercadoPagoPayment {
         try {
             return PaymentClient().get(mpPaymentId)
@@ -92,7 +95,14 @@ class MercadoPagoService(
                     .externalReference(externalReference)
                     .backUrls(backUrls)
 
-            if (!frontendUrl.contains("localhost") && !frontendUrl.contains("127.0.0.1")) {
+            // Mercado Pago rechaza notification_url/auto_return con hosts locales.
+            // En local se resuelve por el PaymentReconciliationScheduler (polling);
+            // con una URL pública (ngrok) el webhook confirma el pago al instante.
+            if (isPublicUrl(backendUrl)) {
+                builder.notificationUrl("$backendUrl/api/payments/webhook")
+            }
+
+            if (isPublicUrl(frontendUrl)) {
                 builder.autoReturn("all")
             }
 

@@ -1,0 +1,19 @@
+# Plantilla de configuración de ngrok para exponer el backend (webhook de
+# Mercado Pago) y el frontend (back_urls / auto_return) durante pruebas locales.
+#
+# 1. Copia este archivo a "ngrok.yml".
+# 2. Pon tu authtoken (https://dashboard.ngrok.com/get-started/your-authtoken).
+# 3. Levanta ambos túneles:  ngrok start --all --config ngrok.yml
+#
+# ngrok mostrará dos URLs públicas (una por túnel). Cópialas en los .env
+# como se explica en docs/mercadopago-ngrok.md.
+version: "3"
+agent:
+  authtoken: TU_AUTHTOKEN_DE_NGROK
+tunnels:
+  backend:
+    proto: http
+    addr: 8080
+  frontend:
+    proto: http
+    addr: 5173

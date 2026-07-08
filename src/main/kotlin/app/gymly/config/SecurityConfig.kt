@@ -48,6 +48,8 @@ class SecurityConfig(
                     .permitAll()
                     .requestMatchers("/actuator/health", "/actuator/info")
                     .permitAll()
+                    .requestMatchers("/payments/webhook")
+                    .permitAll()
                     .requestMatchers("/admin/**")
                     .hasRole(AppConstants.ROLE_ADMIN_UPPER)
                     .anyRequest()
@@ -62,7 +64,15 @@ class SecurityConfig(
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration =
             CorsConfiguration().apply {
-                allowedOriginPatterns = listOf("http://localhost:*", "http://127.0.0.1:*")
+                allowedOriginPatterns =
+                    listOf(
+                        "http://localhost:*",
+                        "http://127.0.0.1:*",
+                        // Túneles de ngrok para exponer el frontend durante pruebas con Mercado Pago
+                        "https://*.ngrok-free.app",
+                        "https://*.ngrok.app",
+                        "https://*.ngrok.io",
+                    )
                 allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 allowedHeaders = listOf("*")
             }

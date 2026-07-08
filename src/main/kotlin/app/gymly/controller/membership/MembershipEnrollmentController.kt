@@ -1,6 +1,7 @@
 package app.gymly.controller.membership
 
 import app.gymly.controller.currentUserId
+import app.gymly.dto.membership.ChangePaymentMethodRequest
 import app.gymly.dto.membership.EnrollRequest
 import app.gymly.dto.membership.MyMembershipResponse
 import app.gymly.service.membership.MembershipEnrollmentService
@@ -27,6 +28,18 @@ class MembershipEnrollmentController(
         ResponseEntity
             .status(HttpStatus.CREATED)
             .body(membershipEnrollmentService.enroll(authentication.currentUserId(), request))
+
+    @PatchMapping("/payment-method")
+    fun changePaymentMethod(
+        authentication: Authentication,
+        @Valid @RequestBody request: ChangePaymentMethodRequest,
+    ): ResponseEntity<MyMembershipResponse> =
+        ResponseEntity.ok(
+            membershipEnrollmentService.changePaymentMethod(
+                authentication.currentUserId(),
+                request.paymentMethod!!,
+            ),
+        )
 
     @PatchMapping("/cancel")
     fun cancel(authentication: Authentication): ResponseEntity<MyMembershipResponse> =
