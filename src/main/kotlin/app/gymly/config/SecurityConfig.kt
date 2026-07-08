@@ -70,7 +70,9 @@ class SecurityConfig(
                         "http://127.0.0.1:*",
                         // Túneles de ngrok para exponer el frontend durante pruebas con Mercado Pago
                         "https://*.ngrok-free.app",
+                        "https://*.ngrok-free.dev",
                         "https://*.ngrok.app",
+                        "https://*.ngrok.dev",
                         "https://*.ngrok.io",
                     )
                 allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")

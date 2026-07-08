@@ -42,9 +42,13 @@ class MercadoPagoService(
 
     fun searchPaymentsByExternalReference(externalReference: String): List<MercadoPagoPayment> {
         try {
+            // offset/limit son obligatorios: sin ellos el SDK 2.9.2 lanza NPE al
+            // construir los query-params de la búsqueda (Map.Entry con valor null).
             val request =
                 MPSearchRequest
                     .builder()
+                    .offset(0)
+                    .limit(30)
                     .filters(mapOf("external_reference" to externalReference))
                     .build()
             return PaymentClient().search(request).results ?: emptyList()
