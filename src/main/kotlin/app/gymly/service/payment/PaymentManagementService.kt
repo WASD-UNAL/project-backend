@@ -81,9 +81,6 @@ class PaymentManagementService(
                     discountId = discount?.id
                 }
 
-        // Referencia única por pago: usar el ID local como external_reference permitía
-        // que pagos aprobados antiguos de la cuenta de Mercado Pago (con el mismo ID
-        // pequeño) se confundieran con el intento actual y aprobaran pagos rechazados.
         if (paymentEntity.checkoutReference == null) {
             paymentEntity.checkoutReference = "gymly-${UUID.randomUUID()}"
         }
