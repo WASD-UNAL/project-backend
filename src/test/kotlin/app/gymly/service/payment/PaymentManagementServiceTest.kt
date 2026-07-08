@@ -14,6 +14,7 @@ import app.gymly.repository.PlanRepository
 import app.gymly.service.membership.DiscountPricingService
 import app.gymly.service.membership.MembershipManagementService
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -152,7 +153,7 @@ class PaymentManagementServiceTest {
         }
 
         @Test
-        fun checkoutUsesPaymentIdAsExternalReference() {
+        fun checkoutGeneratesUniqueCheckoutReferenceAsExternalReference() {
             val pending =
                 Payment(
                     id = 77,
@@ -167,12 +168,39 @@ class PaymentManagementServiceTest {
 
             val response = service.createCheckout(checkoutRequest())
 
+            val referenceCaptor = argumentCaptor<String>()
             verify(mercadoPagoService).createPaymentLink(
                 eq("You are paying: Plan Premium"),
                 eq(BigDecimal("90000.00")),
-                eq("77"),
+                referenceCaptor.capture(),
             )
+            assertTrue(referenceCaptor.firstValue.startsWith("gymly-"))
+            assertEquals(pending.checkoutReference, referenceCaptor.firstValue)
             assertEquals("https://mp.test/checkout", response.checkoutUrl)
+        }
+
+        @Test
+        fun checkoutKeepsExistingCheckoutReferenceOnRetry() {
+            val pending =
+                Payment(
+                    id = 77,
+                    membershipId = 5,
+                    userId = 1,
+                    amount = BigDecimal("90000.00"),
+                    method = PaymentMethod.CARD,
+                    status = PaymentStatus.PENDING,
+                    checkoutReference = "gymly-existing-reference",
+                )
+            whenever(paymentRepository.findByMembershipId(5)).thenReturn(listOf(pending))
+            whenever(paymentRepository.save(any<Payment>())).thenAnswer { it.arguments[0] }
+
+            service.createCheckout(checkoutRequest())
+
+            verify(mercadoPagoService).createPaymentLink(
+                eq("You are paying: Plan Premium"),
+                eq(BigDecimal("90000.00")),
+                eq("gymly-existing-reference"),
+            )
         }
     }
 }

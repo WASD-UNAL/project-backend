@@ -16,6 +16,8 @@ interface PaymentRepository : JpaRepository<Payment, Int> {
 
     fun findByUserIdOrderByCreatedAtDesc(userId: Int): List<Payment>
 
+    fun findByCheckoutReference(checkoutReference: String): Payment?
+
     fun findByMembershipId(membershipId: Int): List<Payment>
 
     fun findByMethodAndStatus(

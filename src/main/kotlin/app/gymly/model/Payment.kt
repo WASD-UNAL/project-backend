@@ -27,6 +27,8 @@ class Payment(
     var method: PaymentMethod = PaymentMethod.CASH,
     @Column(columnDefinition = "TEXT")
     var reference: String? = null,
+    @Column(name = "checkout_reference", unique = true)
+    var checkoutReference: String? = null,
     @Column(nullable = false)
     var status: PaymentStatus = PaymentStatus.PENDING,
     @Column(name = "created_at", insertable = false, updatable = false)

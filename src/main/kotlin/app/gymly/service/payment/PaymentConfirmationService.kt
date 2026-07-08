@@ -43,7 +43,12 @@ class PaymentConfirmationService(
             return
         }
 
-        val attempts = mercadoPagoService.searchPaymentsByExternalReference(paymentId.toString())
+        val reference = payment.checkoutReference ?: paymentId.toString()
+        
+        val attempts =
+            mercadoPagoService
+                .searchPaymentsByExternalReference(reference)
+                .filter { it.externalReference == reference }
 
         val approved = attempts.firstOrNull { it.status == "approved" }
         if (approved != null) {
@@ -89,19 +94,25 @@ class PaymentConfirmationService(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "El pago de Mercado Pago no contiene external_reference")
         }
 
-        val localPaymentId =
-            externalReference.toIntOrNull()
-                ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "El external_reference del pago no es válido")
-
         val localPayment =
-            paymentRepository.findByIdOrNull(localPaymentId)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Pago local con ID $localPaymentId no encontrado")
+            paymentRepository.findByCheckoutReference(externalReference)
+                ?: resolveLegacyPayment(externalReference)
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Ningún pago local corresponde al external_reference $externalReference",
+                )
 
         if (requesterUserId != null && localPayment.userId != requesterUserId) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "El pago no pertenece al usuario autenticado")
         }
 
         return localPayment
+    }
+
+    private fun resolveLegacyPayment(externalReference: String): Payment? {
+        val localPaymentId = externalReference.toIntOrNull() ?: return null
+        val payment = paymentRepository.findByIdOrNull(localPaymentId) ?: return null
+        return payment.takeIf { it.checkoutReference == null }
     }
 
     private companion object {
