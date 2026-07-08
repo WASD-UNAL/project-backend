@@ -42,6 +42,9 @@ out/
 ### Enviroment variables ###
 .env
 
+### ngrok (contiene el authtoken) ###
+ngrok.yml
+
 ### Agent ###
 Agent.md
 AGENTS.md
