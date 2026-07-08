@@ -26,6 +26,7 @@ class MembershipEnrollmentService(
     private val planRepository: PlanRepository,
     private val paymentRepository: PaymentRepository,
     private val membershipViewService: MembershipViewService,
+    private val discountPricingService: DiscountPricingService,
 ) {
     @Transactional
     fun enroll(
@@ -57,11 +58,13 @@ class MembershipEnrollmentService(
             )
 
         if (request.paymentMethod == PaymentMethod.CASH || request.paymentMethod == PaymentMethod.TRANSFER) {
+            val discount = discountPricingService.currentDiscountFor(planId)
             paymentRepository.save(
                 Payment(
                     membershipId = membership.id!!,
                     userId = userId,
-                    amount = plan.price,
+                    discountId = discount?.id,
+                    amount = discount?.let { discountPricingService.discountedPrice(plan.price, it) } ?: plan.price,
                     method = request.paymentMethod,
                     status = PaymentStatus.PENDING,
                     reference = "Inscripción plan ${plan.name}",

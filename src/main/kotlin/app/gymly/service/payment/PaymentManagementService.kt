@@ -10,6 +10,7 @@ import app.gymly.model.PaymentStatus
 import app.gymly.repository.MembershipRepository
 import app.gymly.repository.PaymentRepository
 import app.gymly.repository.PlanRepository
+import app.gymly.service.membership.DiscountPricingService
 import app.gymly.service.membership.MembershipManagementService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -23,6 +24,7 @@ class PaymentManagementService(
     private val membershipRepository: MembershipRepository,
     private val planRepository: PlanRepository,
     private val mercadoPagoService: MercadoPagoService,
+    private val discountPricingService: DiscountPricingService,
 ) {
     @Transactional(readOnly = true)
     fun getAllPayments(): List<PaymentResponse> = paymentRepository.findAll().map { toResponse(it) }
@@ -58,18 +60,24 @@ class PaymentManagementService(
         val conceptName = "You are paying: ${plan.name}"
         val planReference = "Inscripción plan ${plan.name}"
 
+        val discount = discountPricingService.currentDiscountFor(membership.planId)
+        val effectiveAmount = discount?.let { discountPricingService.discountedPrice(plan.price, it) } ?: plan.price
+
         val paymentEntity =
             paymentRepository
                 .findByMembershipId(membership.id!!)
                 .firstOrNull { it.status == PaymentStatus.PENDING }
                 ?.apply {
-                    amount = paymentRequest.amount!!
+                    amount = effectiveAmount
+                    discountId = discount?.id
                     method = paymentRequest.method
                     reference = planReference
                 }
                 ?: toEntity(paymentRequest).apply {
                     status = PaymentStatus.PENDING
                     reference = planReference
+                    amount = effectiveAmount
+                    discountId = discount?.id
                 }
 
         val savedPayment = paymentRepository.save(paymentEntity)

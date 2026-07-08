@@ -8,12 +8,12 @@ import com.mercadopago.client.preference.PreferenceRequest
 import com.mercadopago.exceptions.MPApiException
 import com.mercadopago.exceptions.MPException
 import com.mercadopago.net.MPSearchRequest
-import com.mercadopago.resources.payment.Payment as MercadoPagoPayment
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import java.math.BigDecimal
+import com.mercadopago.resources.payment.Payment as MercadoPagoPayment
 
 @Service
 class MercadoPagoService(

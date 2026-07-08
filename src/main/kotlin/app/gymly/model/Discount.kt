@@ -2,9 +2,13 @@ package app.gymly.model
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinTable
+import jakarta.persistence.ManyToMany
 import jakarta.persistence.Table
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -15,6 +19,10 @@ class Discount(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null,
+    @Column(nullable = false)
+    var name: String,
+    @Column(columnDefinition = "TEXT")
+    var description: String? = null,
     @Column(nullable = false, precision = 5, scale = 2)
     var percentage: BigDecimal,
     @Column(name = "init_date", nullable = false)
@@ -23,4 +31,11 @@ class Discount(
     var endDate: LocalDate,
     @Column(nullable = false)
     var active: Boolean = true,
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "discount_plans",
+        joinColumns = [JoinColumn(name = "discount_id")],
+        inverseJoinColumns = [JoinColumn(name = "plan_id")],
+    )
+    var plans: MutableSet<Plan> = mutableSetOf(),
 )

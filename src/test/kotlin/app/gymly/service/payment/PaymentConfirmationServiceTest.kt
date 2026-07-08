@@ -69,7 +69,8 @@ class PaymentConfirmationServiceTest {
         @Test
         fun approvesAndActivatesWhenMpApproved() {
             val payment = localPayment()
-            whenever(mercadoPagoService.getPayment(mpPaymentId)).thenReturn(mpPayment("approved"))
+            val approvedResult = mpPayment("approved")
+            whenever(mercadoPagoService.getPayment(mpPaymentId)).thenReturn(approvedResult)
             whenever(paymentRepository.findByIdOrNull(77)).thenReturn(payment)
             whenever(paymentRepository.save(any<Payment>())).thenAnswer { it.arguments[0] }
 
@@ -82,7 +83,8 @@ class PaymentConfirmationServiceTest {
         @Test
         fun leavesPendingWhenMpRejectedToRespectRetryGrace() {
             val payment = localPayment()
-            whenever(mercadoPagoService.getPayment(mpPaymentId)).thenReturn(mpPayment("rejected"))
+            val rejectedResult = mpPayment("rejected")
+            whenever(mercadoPagoService.getPayment(mpPaymentId)).thenReturn(rejectedResult)
             whenever(paymentRepository.findByIdOrNull(77)).thenReturn(payment)
 
             val result = service.applyMercadoPagoResult(mpPaymentId)
@@ -95,7 +97,8 @@ class PaymentConfirmationServiceTest {
         @Test
         fun rejectsRequesterWhoDoesNotOwnThePayment() {
             val payment = localPayment()
-            whenever(mercadoPagoService.getPayment(mpPaymentId)).thenReturn(mpPayment("approved"))
+            val approvedResult = mpPayment("approved")
+            whenever(mercadoPagoService.getPayment(mpPaymentId)).thenReturn(approvedResult)
             whenever(paymentRepository.findByIdOrNull(77)).thenReturn(payment)
 
             val error =
@@ -113,9 +116,9 @@ class PaymentConfirmationServiceTest {
         @Test
         fun approvesWhenThereIsAnApprovedAttempt() {
             val payment = localPayment()
+            val attempts = listOf(mpPayment("rejected", id = 111L), mpPayment("approved", id = 222L))
             whenever(paymentRepository.findByIdOrNull(77)).thenReturn(payment)
-            whenever(mercadoPagoService.searchPaymentsByExternalReference("77"))
-                .thenReturn(listOf(mpPayment("rejected", id = 111L), mpPayment("approved", id = 222L)))
+            whenever(mercadoPagoService.searchPaymentsByExternalReference("77")).thenReturn(attempts)
             whenever(paymentRepository.save(any<Payment>())).thenAnswer { it.arguments[0] }
 
             service.reconcilePendingCardPayment(77)
@@ -127,9 +130,9 @@ class PaymentConfirmationServiceTest {
         @Test
         fun keepsPendingWithinGraceWhenNotApproved() {
             val payment = localPayment(createdAt = OffsetDateTime.now().minusMinutes(1))
+            val attempts = listOf(mpPayment("rejected", id = 111L))
             whenever(paymentRepository.findByIdOrNull(77)).thenReturn(payment)
-            whenever(mercadoPagoService.searchPaymentsByExternalReference("77"))
-                .thenReturn(listOf(mpPayment("rejected", id = 111L)))
+            whenever(mercadoPagoService.searchPaymentsByExternalReference("77")).thenReturn(attempts)
 
             service.reconcilePendingCardPayment(77)
 
@@ -141,9 +144,9 @@ class PaymentConfirmationServiceTest {
         @Test
         fun rejectsAfterGraceWhenNotApproved() {
             val payment = localPayment(createdAt = OffsetDateTime.now().minusMinutes(5))
+            val attempts = listOf(mpPayment("rejected", id = 111L))
             whenever(paymentRepository.findByIdOrNull(77)).thenReturn(payment)
-            whenever(mercadoPagoService.searchPaymentsByExternalReference("77"))
-                .thenReturn(listOf(mpPayment("rejected", id = 111L)))
+            whenever(mercadoPagoService.searchPaymentsByExternalReference("77")).thenReturn(attempts)
             whenever(paymentRepository.save(any<Payment>())).thenAnswer { it.arguments[0] }
 
             service.reconcilePendingCardPayment(77)
