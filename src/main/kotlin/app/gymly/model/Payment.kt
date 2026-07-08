@@ -27,8 +27,6 @@ class Payment(
     var method: PaymentMethod = PaymentMethod.CASH,
     @Column(columnDefinition = "TEXT")
     var reference: String? = null,
-    // external_reference enviado a Mercado Pago; debe ser único globalmente porque
-    // la cuenta de MP acumula pagos de otros entornos y reinicios de base de datos.
     @Column(name = "checkout_reference", unique = true)
     var checkoutReference: String? = null,
     @Column(nullable = false)
