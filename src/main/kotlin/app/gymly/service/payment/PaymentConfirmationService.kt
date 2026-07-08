@@ -44,10 +44,7 @@ class PaymentConfirmationService(
         }
 
         val reference = payment.checkoutReference ?: paymentId.toString()
-
-        // La búsqueda de Mercado Pago puede devolver pagos que no corresponden al
-        // checkout actual (referencias repetidas de otros entornos o resultados sin
-        // filtrar), así que solo se consideran intentos con la referencia exacta.
+        
         val attempts =
             mercadoPagoService
                 .searchPaymentsByExternalReference(reference)
@@ -112,13 +109,6 @@ class PaymentConfirmationService(
         return localPayment
     }
 
-    /**
-     * Los checkouts creados antes de introducir checkout_reference usaban el ID local
-     * del pago como external_reference. Solo se acepta ese formato si el pago aún no
-     * tiene una referencia propia: si ya la tiene, un external_reference numérico
-     * proviene de un pago viejo de la cuenta de Mercado Pago y no debe confundirse
-     * con el checkout actual.
-     */
     private fun resolveLegacyPayment(externalReference: String): Payment? {
         val localPaymentId = externalReference.toIntOrNull() ?: return null
         val payment = paymentRepository.findByIdOrNull(localPaymentId) ?: return null
