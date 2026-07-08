@@ -43,7 +43,15 @@ class PaymentConfirmationService(
             return
         }
 
-        val attempts = mercadoPagoService.searchPaymentsByExternalReference(paymentId.toString())
+        val reference = payment.checkoutReference ?: paymentId.toString()
+
+        // La búsqueda de Mercado Pago puede devolver pagos que no corresponden al
+        // checkout actual (referencias repetidas de otros entornos o resultados sin
+        // filtrar), así que solo se consideran intentos con la referencia exacta.
+        val attempts =
+            mercadoPagoService
+                .searchPaymentsByExternalReference(reference)
+                .filter { it.externalReference == reference }
 
         val approved = attempts.firstOrNull { it.status == "approved" }
         if (approved != null) {
@@ -89,19 +97,32 @@ class PaymentConfirmationService(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "El pago de Mercado Pago no contiene external_reference")
         }
 
-        val localPaymentId =
-            externalReference.toIntOrNull()
-                ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "El external_reference del pago no es válido")
-
         val localPayment =
-            paymentRepository.findByIdOrNull(localPaymentId)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Pago local con ID $localPaymentId no encontrado")
+            paymentRepository.findByCheckoutReference(externalReference)
+                ?: resolveLegacyPayment(externalReference)
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Ningún pago local corresponde al external_reference $externalReference",
+                )
 
         if (requesterUserId != null && localPayment.userId != requesterUserId) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "El pago no pertenece al usuario autenticado")
         }
 
         return localPayment
+    }
+
+    /**
+     * Los checkouts creados antes de introducir checkout_reference usaban el ID local
+     * del pago como external_reference. Solo se acepta ese formato si el pago aún no
+     * tiene una referencia propia: si ya la tiene, un external_reference numérico
+     * proviene de un pago viejo de la cuenta de Mercado Pago y no debe confundirse
+     * con el checkout actual.
+     */
+    private fun resolveLegacyPayment(externalReference: String): Payment? {
+        val localPaymentId = externalReference.toIntOrNull() ?: return null
+        val payment = paymentRepository.findByIdOrNull(localPaymentId) ?: return null
+        return payment.takeIf { it.checkoutReference == null }
     }
 
     private companion object {

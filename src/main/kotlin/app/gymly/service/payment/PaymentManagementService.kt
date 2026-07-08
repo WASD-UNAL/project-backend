@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ResponseStatusException
+import java.util.UUID
 
 @Service
 class PaymentManagementService(
@@ -80,9 +81,16 @@ class PaymentManagementService(
                     discountId = discount?.id
                 }
 
+        // Referencia única por pago: usar el ID local como external_reference permitía
+        // que pagos aprobados antiguos de la cuenta de Mercado Pago (con el mismo ID
+        // pequeño) se confundieran con el intento actual y aprobaran pagos rechazados.
+        if (paymentEntity.checkoutReference == null) {
+            paymentEntity.checkoutReference = "gymly-${UUID.randomUUID()}"
+        }
+
         val savedPayment = paymentRepository.save(paymentEntity)
 
-        val checkoutUrl = mercadoPagoService.createPaymentLink(conceptName, savedPayment.amount, savedPayment.id.toString())
+        val checkoutUrl = mercadoPagoService.createPaymentLink(conceptName, savedPayment.amount, savedPayment.checkoutReference!!)
 
         return CheckoutResponse(
             paymentId = savedPayment.id ?: 0,
