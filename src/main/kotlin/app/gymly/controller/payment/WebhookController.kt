@@ -15,14 +15,6 @@ import org.springframework.web.bind.annotation.RestController
 class WebhookController(
     private val webhookService: WebhookService,
 ) {
-    /**
-     * Mercado Pago envía las notificaciones en dos formatos distintos según la
-     * configuración: el formato moderno de Webhooks manda un cuerpo JSON
-     * (`{ "type": "payment", "data": { "id": "123" } }`), mientras que el
-     * formato IPN clásico manda los datos por query-params
-     * (`?topic=payment&id=123` o `?type=payment&data.id=123`).
-     * Aceptamos ambos para no perder confirmaciones.
-     */
     @PostMapping
     fun handleMercadoPagoNotification(
         @RequestBody(required = false) body: WebhookRequest?,

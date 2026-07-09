@@ -42,8 +42,6 @@ class MercadoPagoService(
 
     fun searchPaymentsByExternalReference(externalReference: String): List<MercadoPagoPayment> {
         try {
-            // offset/limit son obligatorios: sin ellos el SDK 2.9.2 lanza NPE al
-            // construir los query-params de la búsqueda (Map.Entry con valor null).
             val request =
                 MPSearchRequest
                     .builder()
@@ -99,9 +97,6 @@ class MercadoPagoService(
                     .externalReference(externalReference)
                     .backUrls(backUrls)
 
-            // Mercado Pago rechaza notification_url/auto_return con hosts locales.
-            // En local se resuelve por el PaymentReconciliationScheduler (polling);
-            // con una URL pública (ngrok) el webhook confirma el pago al instante.
             if (isPublicUrl(backendUrl)) {
                 builder.notificationUrl("$backendUrl/api/payments/webhook")
             }
