@@ -68,7 +68,6 @@ class SecurityConfig(
                     listOf(
                         "http://localhost:*",
                         "http://127.0.0.1:*",
-                        // Túneles de ngrok para exponer el frontend durante pruebas con Mercado Pago
                         "https://*.ngrok-free.app",
                         "https://*.ngrok-free.dev",
                         "https://*.ngrok.app",
